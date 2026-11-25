@@ -36,7 +36,8 @@ h1 em{font-style:italic}
 /* The posts: one plain list, every entry set the same way */
 .posts{list-style:none;margin-top:56px}
 .posts li{display:grid;grid-template-columns:96px 1fr;column-gap:20px;padding:13px 0}
-.posts time{font:400 11px/1 var(--mono);letter-spacing:.04em;color:var(--mute);padding-top:.72em}
+.posts time{display:block;font:400 11px/1 var(--mono);letter-spacing:.04em;color:var(--mute);padding-top:.72em}
+.posts .tag{display:block;margin-top:9px;font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .posts h2{font:400 1.42em/1.2 var(--serif);color:var(--soft);text-wrap:balance}
 .posts p{margin-top:4px;font-size:.84em;line-height:1.5;color:var(--mute);text-wrap:pretty}
 .posts a{display:block}
@@ -65,6 +66,8 @@ footer{margin-top:56px;display:flex;justify-content:space-between;font:400 10px/
   .back{margin-top:44px}
   .posts li{grid-template-columns:1fr}
   .posts time{padding:0 0 4px}
+  .posts .when{display:flex;align-items:baseline;gap:.9em}
+  .posts .tag{margin-top:0}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.rise{opacity:1;transform:none}}
 </style>
@@ -85,7 +88,7 @@ footer{margin-top:56px;display:flex;justify-content:space-between;font:400 10px/
   </header>
 
   <ul class="posts rise" style="--i:3">
-    <li><time datetime="2026-11-16">November</time><a href="writing/what-a-gtm-engineer-actually-does.html"><h2><span>What a GTM engineer actually does</span></h2><p>Not quite sales ops, not quite data engineering. The plain-English version of the job, and what a real week of it looks like.</p></a></li>
+    <li><div class="when"><time datetime="2026-11-16">November</time><span class="tag">Latest</span></div><a href="writing/what-a-gtm-engineer-actually-does.html"><h2><span>What a GTM engineer actually does</span></h2><p>Not quite sales ops, not quite data engineering. The plain-English version of the job, and what a real week of it looks like.</p></a></li>
     <li><time datetime="2026-12">December</time><div><h2>How I’d break into GTM engineering today</h2><p>The skills worth learning first, the portfolio projects that get you hired, and the ones that don’t.</p></div></li>
     <li><time datetime="2026-12">December</time><div><h2>The enrichment waterfall: good data without paying for it four times</h2><p>Ordering your data providers so each one only fills the gaps the last one left.</p></div></li>
     <li><time datetime="2027-01">January</time><div><h2>Outbound that doesn’t read like outbound</h2><p>Why the best sequences start from a signal, not a list, and how to build the plumbing for it.</p></div></li>
