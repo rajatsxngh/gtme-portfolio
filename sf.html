@@ -136,12 +136,6 @@ h1 em{font-style:italic}
   background:radial-gradient(ellipse at center,rgb(242 240 236 / var(--o)) 0,rgb(242 240 236 / 0) 68%);filter:blur(6px);
   transform:translate3d(-40vw,0,0);animation:wisp var(--d) linear var(--dl) infinite}
 @keyframes wisp{from{transform:translate3d(-40vw,0,0)}to{transform:translate3d(120vw,0,0)}}
-.chip{position:absolute;z-index:2;top:21%;font:500 10px/1 var(--mono);letter-spacing:.04em;padding:5px 7px;border-radius:3px;white-space:nowrap}
-.hint{left:24px;background:var(--accent);color:#fff;opacity:0;transform:translateY(4px);transition:opacity .4s,transform .4s var(--ease)}
-.hint.on{opacity:1;transform:none}
-.tally{right:24px;color:var(--soft);border:1px solid var(--line);background:rgb(242 240 236 / .85);opacity:0;transition:opacity .6s .6s}
-.s4 .tally{opacity:1}
-@media (max-width:640px){.chip{top:43%}.hint{left:16px}.tally{right:16px;top:calc(43% + 26px)}}
 @media (max-height:520px){.scene{display:none}.page{padding-bottom:24px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 /* Mock only: flip between the two versions */
@@ -201,8 +195,6 @@ h1 em{font-style:italic}
 <div class="scene" id="scene" aria-hidden="true">
   <canvas id="gate"></canvas>
   <div class="wisps" id="wisps"></div>
-  <span class="chip hint" id="hint">SPACE OR CLICK TO HOP</span>
-  <span class="chip tally" id="tally">MILES 812.0 · HOPS 00</span>
 </div>
 
 <script>
@@ -227,7 +219,7 @@ const tick = () => {
 };
 tick(); setInterval(tick, 15000);
 
-/* ── Split-flap text (name tag + hour chip) ────────────── */
+/* ── Split-flap text (the copy-email tag) ───────────────── */
 const FLAP = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const flaps = new WeakMap();
 function flap(el, to, step = 32) {
@@ -352,7 +344,7 @@ document.querySelectorAll('.dock a').forEach(a => a.addEventListener('click', e 
    ordered dithering) and scaled up with hard edges.
    ══════════════════════════════════════════════════════════ */
 const scene = $('#scene'), cv = $('#gate'), g2 = cv.getContext('2d');
-const hintEl = $('#hint'), tallyEl = $('#tally'), wispEl = $('#wisps');
+const wispEl = $('#wisps');
 const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 const pack = (r, g, b) => ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;      // ABGR, little-endian
 const col = h => { const c = rgb(h); return pack(c[0], c[1], c[2]); };
@@ -509,15 +501,13 @@ const BUOY = ['....w....', '....R....', '...RRR...', '...R.R...', '...R.R...', '
 const OB = { log: { rows: ['.ww...w', 'wwwwwww'], m: { w: C.drift } }, kelp: { rows: ['.g..g.g.', 'gggggggg'], m: { g: C.grass[2] } }, seal: { rows: ['.kk.', 'kkkk'], m: { k: C.ink } } };
 const pd = { x: 40, mode: 'paddle', t: 0, dur: 0, z: 0, vz: 0, v: 10, dist: 0, ph: 0 };
 const SEQ = { wobble: ['swim', .3], swim: ['climb', 1.5], climb: ['rise', .6], rise: ['shake', .6], shake: ['paddle', .6] };
-let obs = [], hops = 0, parts = [], LANE = 0, bark = 0, milesShown = '812.0', rndA = mulberry(8);
+let obs = [], parts = [], LANE = 0, bark = 0, rndA = mulberry(8);
 function sprite(rows, x, y, ax, flip, map) {                 // (x, y): where the feet (or the waterline) sit
   const h = rows.length, X = Math.round(x), Y = Math.round(y);
   for (let j = 0; j < h; j++) { const r = rows[j]; for (let i = 0; i < r.length; i++) { const c = map[r[i]]; if (c === undefined) continue;
     const px = X + (flip ? ax - i : i - ax), py = Y - (h - 1 - j); if (inb(px, py)) buf[py * W + px] = c; } }
 }
 function spray(x, y, n, up) { for (let k = 0; k < n; k++) parts.push({ x: x + (rndA() - .5) * 8, y, vx: (rndA() - .5) * 30, vy: -(up || 14) - rndA() * 20, life: .35 + rndA() * .45, age: 0, c: rndA() < .5 ? C.white : C.water[0] }); }
-const pad2 = n => String(Math.min(99, n)).padStart(2, '0');
-function tallyNow(flip) { const txt = `MILES ${milesShown} · HOPS ${pad2(hops)}`; if (flip) flap(tallyEl, txt, 14); else tallyEl.textContent = txt; }
 function newObstacles() {                                    // things floating in his lane for this crossing
   obs = [];
   for (let x = 74 + rndA() * 50; x < W - 34; x += 96 + rndA() * 90) obs.push({ x, type: ['log', 'kelp', 'seal', 'log'][(rndA() * 4) | 0], auto: rndA() < .66, done: false, ph: rndA() * 6 });
@@ -539,9 +529,7 @@ function stepPaddle(dt) {
   for (const o of obs) { const d = o.x - (p.x + 9);                                // the nose of the board is what meets things
     if (!o.done && o.auto && d < 8 && d > 5) hop();
     if (!o.done && Math.abs(d) < 3) { o.done = true;
-      if (p.z > 1.5) { hops++; tallyNow(true); }
-      else if (p.mode === 'paddle') { p.mode = 'wobble'; p.t = 0; p.dur = SEQ.wobble[1]; } } }
-  const m = (812 + p.dist / 720).toFixed(1); if (m !== milesShown) { milesShown = m; tallyNow(false); }
+      if (p.z <= 1.5 && p.mode === 'paddle') { p.mode = 'wobble'; p.t = 0; p.dur = SEQ.wobble[1]; } } }       // hopped clear, or in he goes
   bark -= dt;
 }
 
@@ -555,6 +543,33 @@ function calcFog(t) {
       if (v2 > 0) { const gate = sstep(xL + 8, xL + 40, x) * sstep(xR - 8, xR - 40, x); if (gate > 0) a = Math.max(a, clamp((fb2(x * .03 - t * .05 + 9, y * .2) - .3) * 3, 0, 1) * v2 * gate); }
       a *= FOGK; const b = bay(x, y);
       fogA[k] = a > b + .22 ? 2 : a > b * .85 + .03 ? 1 : 0; } }
+}
+
+/* ── Fog that gathers behind the words ──
+   Wherever a line of text sits over the bridge, Karl thickens there. The fog takes the shape of the
+   lines themselves (not a box), its edge is ragged and drifts, and it is dithered like the rest. */
+let tfIdx = new Int32Array(0), tfDist = new Float32Array(0), tfA = new Uint8Array(0);
+function textFogMap() {
+  if (!W) return;
+  const sr = cv.getBoundingClientRect(), k = sr.width / W, REACH = 24, rects = [], rg = document.createRange();
+  const tw = document.createTreeWalker(document.querySelector('.col'), NodeFilter.SHOW_TEXT);
+  for (let n = tw.nextNode(); n; n = tw.nextNode()) {                                   // every run of visible text, line by line
+    if (!n.nodeValue.trim() || n.parentElement.closest('.dock, .tag, .slug, output')) continue;
+    rg.selectNodeContents(n);
+    for (const q of rg.getClientRects()) { if (q.width < 2 || q.height < 5) continue; const y1 = (q.bottom - sr.top) / k + 2; if (y1 < -REACH) continue;
+      rects.push([(q.left - sr.left) / k - 3, (q.top - sr.top) / k - 2, (q.right - sr.left) / k + 3, y1]); }
+  }
+  const idx = [], dist = [];
+  if (rects.length) { let yMax = 0; for (const r of rects) yMax = Math.max(yMax, r[3]); yMax = Math.min(H - 1, Math.ceil(yMax + REACH));
+    for (let y = 0; y <= yMax; y++) for (let x = 0; x < W; x++) { let d = 1e9;
+      for (const r of rects) { const dx = x < r[0] ? r[0] - x : x > r[2] ? x - r[2] : 0, dy = y < r[1] ? r[1] - y : y > r[3] ? y - r[3] : 0, q = dx > dy ? dx + dy * .4 : dy + dx * .4; if (q < d) { d = q; if (d === 0) break; } }
+      if (d < REACH) { idx.push(y * W + x); dist.push(d); } } }
+  tfIdx = Int32Array.from(idx); tfDist = Float32Array.from(dist); tfA = new Uint8Array(idx.length);
+}
+function calcTextFog(t) {
+  for (let i = 0, n = tfIdx.length; i < n; i++) { const p = tfIdx[i], x = p % W, y = (p / W) | 0, d = tfDist[i]; let a = 1;       // right behind the letters it is always clear
+    if (d >= 1) a = 1 - sstep(-2, 14, d + (fb2(x * .05 - t * .045, y * .1 + t * .012 + 7) - .5) * 18);                              // further out the edge wanders with the drift
+    const b = bay(x, y); tfA[i] = a > b * .9 + .1 ? 2 : a > b * .75 ? 1 : 0; }
 }
 
 /* ── The frame ── */
@@ -590,7 +605,7 @@ function paint(t, dt) {
   if (Math.sin(t * 2.6) > 0) { put(xL, TT - 2, C.red); put(xR, TT - 2, C.red); }
   if (Math.sin(t * 1.1) > .6) put(X0 - 9, HZ - 10, C.gold);
   // fog
-  if (frameNo % 3 === 0 || reduce) calcFog(t);
+  if (frameNo % 3 === 0 || reduce) { calcFog(t); calcTextFog(t); }
   for (let y = TT + 2, k = 0; y <= HZ + 5; y++) { const sky = y > DK - 27, row = y * W;            // low down, the fog's edge shows faintly against the page too
     for (let x = 0; x < W; x++, k++) { const f = fogA[k]; if (f === 2) buf[row + x] = 0; else if (f === 1 && (sky || buf[row + x])) buf[row + x] = C.fog; } }
   // birds: gulls up high, pelicans skimming the water, and sometimes the parrots come through
@@ -598,6 +613,7 @@ function paint(t, dt) {
     const gx = Math.round(g.x), gy = Math.round((g.low ? HZ + 7 : g.y) + Math.sin(t * .8 + g.ph) * 1.5), e = (Math.floor(t * (g.low ? 1.2 : 3.5) + g.ph) & 1) ? 1 : -1;
     put(gx - 2, gy + e, C.bird); put(gx - 1, gy, C.bird); put(gx, gy, C.bird); put(gx + 1, gy, C.bird); put(gx + 2, gy + e, C.bird); }
   { const pf = (t % 41) / 5; if (pf < 1) for (let k = 0; k < 6; k++) { const px = pf * (W + 50) - 20 - k * 6, py = HZ - 40 + Math.sin(pf * 15 + k) * 4 + (k & 1) * 3; put(px, py, C.green); put(px + 1, py, C.red); } }
+  for (let i = 0, n = tfIdx.length; i < n; i++) { const f = tfA[i]; if (f === 2) buf[tfIdx[i]] = 0; else if (f === 1 && buf[tfIdx[i]]) buf[tfIdx[i]] = C.fog; }     // the fog behind the words
   // a channel buoy rocking in the swell, a sea lion asleep on it
   if (W >= 300) { const ux = Math.round(W * .9 + Math.sin(t * .9) * 1.2), uy = LANE - 11 + Math.round(Math.sin(t * 1.3) * .7), lit = Math.sin(t * 3) > .2;
     blitTo(put, BUOY, ux - 4, uy - 10, { R: C.red, r: C.redD, w: lit ? C.gold : C.redD, W: C.white, k: C.trunk });
@@ -634,7 +650,7 @@ function resize() {
   xL = Math.round(W * (small ? .2 : .19)); xR = Math.round(W * (small ? .8 : .81));      // on wide screens the towers stand either side of the text
   X0 = xL - Math.round((xR - xL) * .2); X1 = xR + Math.round((xR - xL) * .27);
   bakeBack(); initBay(); newObstacles(); if (pd.x > W) pd.x = W * .3;
-  fogA = new Uint8Array(W * (HZ + 5 - (TT + 2) + 1)); rv = new Uint8Array(W * H);
+  fogA = new Uint8Array(W * (HZ + 5 - (TT + 2) + 1)); rv = new Uint8Array(W * H); textFogMap();
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) rv[y * W + x] = (vnoise(x * .04, y * .07 + 70) * .55 + bay(x, y) * .45) * 255;
 }
 function frame(now) {
@@ -647,17 +663,14 @@ function frame(now) {
 }
 
 /* ── Input: space, a click or a tap on the scene makes him hop ── */
-let usedOnce = false, rsT = 0;
-const used = () => { if (!usedOnce) { usedOnce = true; hintEl.classList.remove('on'); } };
+let rsT = 0;
 addEventListener('pointerdown', e => {
   if (reduce || !buf || e.target.closest?.('a,button,.else,.lk,.name')) return;
   const b = cv.getBoundingClientRect(); if ((e.clientY - b.top) / b.height * H < TT) return;
-  hop(); used();
+  hop();
 });
-addEventListener('keydown', e => { if (e.code !== 'Space' || reduce || e.target.closest?.('input,textarea,button,a,[contenteditable]')) return; e.preventDefault(); hop(); used(); });
+addEventListener('keydown', e => { if (e.code !== 'Space' || reduce || e.target.closest?.('input,textarea,button,a,[contenteditable]')) return; e.preventDefault(); hop(); });
 addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { resize(); if (reduce) paint(0, 0); }, 140); });
-if (matchMedia('(hover: none)').matches) hintEl.textContent = 'TAP TO HOP';
-setTimeout(() => { if (!usedOnce && !reduce) hintEl.classList.add('on'); }, 5200);
 
 /* Karl, out of focus */
 { const wr = mulberry(415);
@@ -667,6 +680,8 @@ setTimeout(() => { if (!usedOnce && !reduce) hintEl.classList.add('on'); }, 5200
 
 resize();
 if (reduce) paint(0, 0); else requestAnimationFrame(frame);
+const refog = () => { textFogMap(); if (reduce) paint(0, 0); };                 // the lines settle once the fonts load and the intro ends
+document.fonts?.ready.then(refog); setTimeout(refog, 1400); setTimeout(refog, 2800);
 /* ── "elsewhere" dock: pixel icons, magnified by how close the cursor is ── */
 const ICONS = {
   in: ['............', '.XX.........', '.XX.........', '............', '.XX..XX.XXX.', '.XX..XXXXXXX', '.XX..XXX..XX', '.XX..XX...XX', '.XX..XX...XX', '.XX..XX...XX', '.XX..XX...XX', '............'],
