@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alex Rivera — GTM Engineer, San Francisco</title>
+<meta name="description" content="Alex Rivera builds the systems behind revenue: enrichment pipelines, outbound engines and the dashboards that keep them honest. Based in San Francisco.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens: frost paper, deep-winter ink, one red scarf ── */
+:root{
+  --paper:#ECEEF3; --card:#FBFCFE; --ink:#1C2030; --soft:#4E5466; --mute:#7C8296; --line:#CDD2DE;
+  --accent:#C8392E; --bay:#3C5A8C; --ok:#2F8F5B;
+  --serif:"Instrument Serif",Georgia,serif;
+  --sans:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --spring:cubic-bezier(.3,1.5,.5,1);
+  --scene-h:clamp(300px,54vh,500px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+::selection{background:var(--accent);color:#fff}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* Paper grain over everything */
+.grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.06;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── Layout: one screen, scales to width AND height ─────── */
+.page{position:fixed;inset:0;display:grid;place-items:center;z-index:2;padding:6vh 24px calc(var(--scene-h) * .58);
+  font-size:clamp(15px,min(1.05vw + 12px,2.45vh),20px);line-height:1.6}
+.col{position:relative;width:min(600px,100%)}
+
+/* Printer's-proof frame: corner brackets + slug line */
+.crop{position:absolute;width:16px;height:16px;border-color:var(--ink);border-style:solid;border-width:0;opacity:0;
+  transition:opacity .4s, transform .7s var(--ease)}
+.crop.tl{top:-26px;left:-26px;border-top-width:1px;border-left-width:1px;transform:translate(-14px,-14px)}
+.crop.tr{top:-26px;right:-26px;border-top-width:1px;border-right-width:1px;transform:translate(14px,-14px)}
+.crop.bl{bottom:-26px;left:-26px;border-bottom-width:1px;border-left-width:1px;transform:translate(-14px,14px)}
+.crop.br{bottom:-26px;right:-26px;border-bottom-width:1px;border-right-width:1px;transform:translate(14px,14px)}
+.s1 .crop{opacity:.9;transform:none}
+.s4 .crop{opacity:.28}
+.slug{position:absolute;top:-52px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+  font:400 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);opacity:0;transition:opacity .5s .2s}
+.slug svg{width:14px;height:14px;display:block;color:var(--accent)}
+.s1 .slug{opacity:1}
+
+/* ── Heading ─────────────────────────────────────────────── */
+h1{font:400 3em/1.05 var(--serif);letter-spacing:-.01em}
+h1 .w{display:inline-block;opacity:0;transform:translateY(.45em);filter:blur(8px);
+  transition:opacity .7s var(--ease),transform .9s var(--ease),filter .7s var(--ease);transition-delay:calc(var(--i)*110ms)}
+.s2 h1 .w{opacity:1;transform:none;filter:none}
+h1 em{font-style:italic}
+
+.name{position:relative;display:inline-block;font:inherit;letter-spacing:inherit;line-height:inherit;outline:none}
+.name::after{content:"";position:absolute;left:0;right:0;bottom:.06em;height:.04em;min-height:1px;background:var(--accent);
+  transform:scaleX(0);transform-origin:right;transition:transform .45s var(--ease)}
+.name:is(:hover,:focus-visible)::after{transform:scaleX(1);transform-origin:left}
+.tag{position:absolute;left:100%;top:.1em;margin-left:.35em;white-space:nowrap;pointer-events:none;
+  font:500 10px/1 var(--mono);letter-spacing:.04em;color:#fff;background:var(--ink);padding:5px 7px 5px;border-radius:3px;
+  opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .3s var(--ease),background .2s}
+.name:is(:hover,:focus-visible) .tag,.tag.on{opacity:1;transform:none}
+.tag.ok{background:var(--accent)}
+
+/* ── Meta line ───────────────────────────────────────────── */
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:.3em .9em;margin-top:.9em;color:var(--soft);font-size:.86em}
+.status{display:inline-flex;align-items:center;gap:.5em}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--ok);position:relative}
+.status i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--ok);animation:ping 2.4s var(--ease) infinite}
+@keyframes ping{0%{transform:scale(.4);opacity:.9}80%,100%{transform:scale(1.6);opacity:0}}
+.coord{display:inline-flex;flex-direction:column;font:500 .5em/1.25 var(--mono);letter-spacing:.04em;color:var(--mute)}
+.clock{font-family:var(--mono);font-size:.82em;color:var(--mute)}
+.clock b{font-weight:400;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* ── Body copy ───────────────────────────────────────────── */
+.rest{margin-top:1.7em}
+.rest p+p{margin-top:1.05em}
+.rest p{text-wrap:pretty}
+.fog{opacity:.12;filter:blur(7px);transition:opacity .8s var(--ease),filter .8s var(--ease)}
+.s3 .fog{opacity:1;filter:none}
+
+/* Focus mode while previewing: everything else recedes */
+.fade{transition:opacity .3s,filter .3s}
+.peek .fade,.peek .lk:not(.hot),.peek .else{opacity:.32;filter:blur(1.4px)}
+
+/* Annotated links: dotted rule + footnote metric */
+.lk{position:relative;white-space:nowrap;cursor:pointer;transition:opacity .3s,filter .3s;outline:none}
+.lk::before,.lk::after{content:"";position:absolute;left:0;right:0;bottom:-.1em;height:1px}
+.lk::before{background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px);opacity:.4}
+.lk::after{background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.lk:is(:hover,:focus-visible)::after,.lk.hot::after{transform:scaleX(1)}
+.lk sup{font:500 .5em/1 var(--mono);letter-spacing:.03em;color:var(--mute);margin-left:.2em;vertical-align:.9em;transition:color .25s}
+.lk:is(:hover,:focus-visible) sup,.lk.hot sup{color:var(--accent)}
+.lk .ico{display:inline-grid;place-items:center;width:.95em;height:.95em;vertical-align:-.14em;margin-right:.28em;border-radius:22%;
+  background:var(--c,#1B1F27);color:#fff;font:600 11px/1 var(--sans)}
+
+/* "elsewhere": a dock of pixel icons springs up; the one under the cursor swells */
+.else{position:relative;display:inline-block;white-space:nowrap;cursor:default;outline:none;transition:opacity .3s,filter .3s}
+.else>.else-w{font:italic 1.12em/1 var(--serif);border-bottom:1px solid var(--line)}
+.dock{position:absolute;left:50%;bottom:100%;z-index:20;display:flex;align-items:flex-end;justify-content:center;gap:.42em;
+  padding:1.2em .9em .55em;transform:translateX(calc(-50% + var(--shift,0px)));pointer-events:none}
+.dock::before{content:"";position:absolute;inset:.8em 0 0;border-radius:999px;background:var(--paper);filter:blur(10px);opacity:0;transition:opacity .2s}
+.else:is(:hover,:focus-within) .dock{pointer-events:auto}
+.else:is(:hover,:focus-within) .dock::before{opacity:.94}
+.dock a{--s:1;position:relative;flex:0 0 auto;width:calc(2.05em*var(--s));height:calc(2.05em*var(--s));color:var(--ink);outline:none;
+  opacity:0;transform:translate(var(--from),1.6em) scale(.2);transition:transform .24s cubic-bezier(.5,0,.7,.4),opacity .16s,color .15s}
+.else:is(:hover,:focus-within) .dock a{opacity:1;transform:none;
+  transition:transform .48s var(--spring) var(--wait),opacity .16s ease var(--wait),color .15s}
+.dock svg{display:block;width:100%;height:100%;shape-rendering:crispEdges;overflow:visible}
+.dock a:is([data-near],:focus-visible){color:var(--accent)}
+.dock b{position:absolute;left:50%;bottom:calc(100% + .5em);transform:translateX(-50%);font:500 10px/1 var(--mono);letter-spacing:.04em;
+  color:var(--ink);opacity:0;transition:opacity .12s;white-space:nowrap}
+.dock a:is([data-near],:focus-visible) b{opacity:1}
+.page:has(.else:is(:hover,:focus-within)) :is(.fade,.lk){opacity:.3;filter:blur(2.4px)}
+
+/* ── Preview card ────────────────────────────────────────── */
+.card{position:fixed;left:0;top:0;width:240px;z-index:40;pointer-events:none;background:var(--card);border-radius:10px;padding:5px;
+  box-shadow:0 0 0 .5px rgba(0,0,0,.14),0 2px 4px rgba(0,0,0,.05),0 14px 34px rgba(0,0,0,.13);
+  opacity:0;scale:.94;transition:opacity .14s,scale .2s var(--ease);will-change:transform}
+.card.on{opacity:1;scale:1}
+.card canvas{display:block;width:100%;height:auto;border-radius:6px}
+
+/* ── The pond: pixel art that dissolves upward into the page ── */
+.scene{position:fixed;left:0;right:0;bottom:0;height:var(--scene-h);z-index:0;pointer-events:none;overflow:hidden}
+.scene canvas{position:absolute;left:0;bottom:0;display:block;image-rendering:crisp-edges;image-rendering:pixelated;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 21%,#000 47%);mask-image:linear-gradient(to bottom,transparent 21%,#000 47%)}
+/* low winter sun from the lower left: a warm wash that never reaches the text */
+.glow{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:0;transition:opacity 2.4s 1s;
+  background:radial-gradient(ellipse 70% 90% at -6% 108%,rgb(255 206 170 / .95),rgb(255 214 190 / .4) 38%,rgb(255 220 200 / 0) 70%)}
+.s4 .glow{opacity:1}
+/* snow close to the lens: big, soft, out of focus */
+.bokeh{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 2s 1.2s;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 26%,#000 72%);mask-image:linear-gradient(to bottom,transparent 26%,#000 72%)}
+.s4 .bokeh{opacity:1}
+.bokeh i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);margin:calc(var(--s) / -2);border-radius:50%;
+  background:radial-gradient(circle,rgb(255 255 255 / .95) 0,rgb(255 255 255 / .5) 36%,rgb(255 255 255 / 0) 70%);
+  filter:blur(var(--b));opacity:0;animation:drift var(--d) linear var(--dl) infinite}
+@keyframes drift{0%{transform:translate3d(0,0,0);opacity:0}12%,88%{opacity:var(--o)}100%{transform:translate3d(var(--dx),var(--dy),0);opacity:0}}
+.chip{position:absolute;z-index:2;top:39%;font:500 10px/1 var(--mono);letter-spacing:.04em;padding:5px 7px;border-radius:3px;white-space:nowrap}
+.hint{left:24px;background:var(--accent);color:#fff;opacity:0;transform:translateY(4px);transition:opacity .4s,transform .4s var(--ease)}
+.hint.on{opacity:1;transform:none}
+.tally{right:24px;color:var(--soft);border:1px solid var(--line);background:rgb(236 238 243 / .82);opacity:0;transition:opacity .6s .6s}
+.s4 .tally{opacity:1}
+@media (max-width:640px){.chip{top:47%}.hint{left:16px}.tally{right:16px;top:calc(47% + 26px)}}
+@media (max-height:520px){.scene{display:none}.page{padding-bottom:24px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+/* Mock only: flip between the two versions */
+.ver{position:fixed;top:14px;right:16px;z-index:70;display:flex;font:500 10px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--card)}
+.ver a{padding:6px 9px;color:var(--mute);transition:color .15s}
+.ver a:hover{color:var(--ink)}
+.ver a[aria-current]{background:var(--ink);color:#fff}
+@media (max-width:640px){.ver{top:auto;right:auto;left:10px;bottom:10px}}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<nav class="ver" aria-label="Mock versions"><a href="index.html" aria-current="page">Pond</a><a href="sf.html">SF</a></nav>
+
+<main class="page" id="page">
+  <div class="col">
+    <span class="crop tl" aria-hidden="true"></span><span class="crop tr" aria-hidden="true"></span>
+    <span class="crop bl" aria-hidden="true"></span><span class="crop br" aria-hidden="true"></span>
+    <div class="slug" aria-hidden="true">
+      <span>Proof 01 — GTM Engineering</span>
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1"><circle cx="7" cy="7" r="4"/><path d="M7 0v14M0 7h14"/></svg>
+      <span>SF 94110 · Rev. 2026.11</span>
+    </div>
+
+    <header>
+      <h1>
+        <span class="w" style="--i:0">Hi,</span> <span class="w" style="--i:1">I'm</span>
+        <button class="name" id="name" aria-label="Alex. Copy my email address"><span class="w" style="--i:2"><em>Alex.</em></span><span class="tag" id="tag" aria-hidden="true">COPY EMAIL</span></button>
+      </h1>
+      <p class="meta fog fade">
+        <span class="status"><i></i>Open to new projects</span>
+        <span>Mission District, SF</span>
+        <span class="coord" aria-label="37.7599 north, 122.4148 west"><span>37.7599° N</span><span>122.4148° W</span></span>
+        <span class="clock" id="clock" aria-label="Local time in San Francisco">--<b>:</b>--</span>
+      </p>
+      <output id="live" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></output>
+    </header>
+
+    <div class="rest fog">
+      <p><span class="fade">I build the systems behind revenue: enrichment pipelines, outbound engines and the dashboards that keep them honest. You can find me </span><span class="else" id="else" tabindex="0" role="button" aria-haspopup="true"><span class="else-w">elsewhere</span><span class="dock" id="dock">
+          <a href="#" data-i="in" aria-label="LinkedIn" style="--from:5em;--wait:70ms"><b>LinkedIn</b></a>
+          <a href="#" data-i="gh" aria-label="GitHub" style="--from:2.5em;--wait:35ms"><b>GitHub</b></a>
+          <a href="#" data-i="x" aria-label="X" style="--from:0em;--wait:0ms"><b>X</b></a>
+          <a href="#" data-i="mail" aria-label="Email" style="--from:-2.5em;--wait:35ms"><b>Email</b></a>
+          <a href="#" data-i="cal" aria-label="Book a call" style="--from:-5em;--wait:70ms"><b>Book a call</b></a>
+        </span></span><span class="fade">.</span></p>
+
+      <p><span class="fade">Right now I lead GTM engineering at </span><a class="lk" href="#" data-p="northwind"><span class="ico" style="--c:#1C2030">N</span>Northwind<sup>+212%</sup></a><span class="fade"> and advise the growth team at </span><a class="lk" href="#" data-p="lumen"><span class="ico" style="--c:#3C5A8C">L</span>Lumen Labs<sup>18.4%</sup></a><span class="fade">.</span></p>
+
+      <p><span class="fade">Before that I took </span><a class="lk" href="#" data-p="fieldnote">Fieldnote<sup>$4.1M</sup></a><span class="fade"> from zero to a real pipeline. Off-hours I </span><a class="lk" href="#" data-p="run">run the Embarcadero<sup>812 mi</sup></a><span class="fade">, shoot </span><a class="lk" href="#" data-p="film">film in the fog<sup>36 rolls</sup></a><span class="fade">, and write in a public </span><a class="lk" href="#" data-p="notes">notebook<sup>48</sup></a><span class="fade">.</span></p>
+    </div>
+  </div>
+
+  <div class="card" id="card" aria-hidden="true"><canvas width="480" height="300"></canvas></div>
+</main>
+
+<div class="scene" id="scene" aria-hidden="true">
+  <canvas id="pond"></canvas>
+  <div class="glow"></div>
+  <div class="bokeh" id="bokeh"></div>
+  <span class="chip hint" id="hint">CLICK THE ICE · SPACE TO JUMP</span>
+  <span class="chip tally" id="tally">FALLS 00 · LANDED 00</span>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const root = document.documentElement;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EMAIL = 'alex@example.com';       // dummy
+const TZ = 'America/Los_Angeles';
+
+/* ── Intro timeline: proof frame → heading → copy → scene ── */
+const stages = [['s1',80],['s2',380],['s3',1150],['s4',1700]];
+if (reduce) stages.forEach(([c]) => root.classList.add(c));
+else stages.forEach(([c,t]) => setTimeout(() => root.classList.add(c), t));
+
+/* ── Live SF clock ─────────────────────────────────────── */
+const clock = $('#clock');
+const tick = () => {
+  const p = new Intl.DateTimeFormat('en-US',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:TZ}).formatToParts(new Date());
+  const g = t => p.find(x => x.type === t)?.value ?? '';
+  clock.innerHTML = `${g('hour')}<b>:</b>${g('minute')} ${g('dayPeriod').toLowerCase()} PT`;
+};
+tick(); setInterval(tick, 15000);
+
+/* ── Split-flap text (name tag + hour chip) ────────────── */
+const FLAP = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const flaps = new WeakMap();
+function flap(el, to, step = 32) {
+  cancelAnimationFrame(flaps.get(el) || 0);
+  if (reduce) { el.textContent = to; return; }
+  const len = Math.max(el.textContent.length, to.length), t0 = performance.now();
+  const run = now => {
+    let out = '', done = true;
+    for (let i = 0; i < len; i++) {
+      if (now - t0 >= 90 + i * step) out += to[i] ?? '';
+      else { done = false; out += to[i] === ' ' ? ' ' : FLAP[(Math.random() * FLAP.length) | 0]; }
+    }
+    el.textContent = out;
+    if (!done) flaps.set(el, requestAnimationFrame(run));
+  };
+  flaps.set(el, requestAnimationFrame(run));
+}
+
+/* ── Name: copy email ──────────────────────────────────── */
+const tag = $('#tag'), live = $('#live');
+let resetT = 0;
+async function copyEmail() {
+  try { await navigator.clipboard.writeText(EMAIL); } catch {}
+  tag.classList.add('on','ok'); flap(tag, 'COPIED ✓'); live.textContent = 'Email copied';
+  clearTimeout(resetT);
+  resetT = setTimeout(() => { tag.classList.remove('on','ok'); flap(tag, 'COPY EMAIL'); live.textContent = ''; }, 1800);
+}
+$('#name').addEventListener('click', copyEmail);
+
+/* ── Preview cards: generated mini-dashboards ──────────── */
+const seeded = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
+const series = (seed, n, trend) => { const r = seeded(seed); let v = .3; return Array.from({length:n}, () => (v = Math.max(.05, Math.min(.95, v + (r() - .45) * .22 + trend / n)))); };
+const PV = {
+  northwind:{label:'NORTHWIND · PIPELINE SOURCED', v:212, f:v=>`+${Math.round(v)}%`, kind:'line', s:series(7,28,.5), foot:'Q1 → Q3 2026'},
+  lumen:    {label:'LUMEN LABS · REPLY RATE',      v:18.4,f:v=>`${v.toFixed(1)}%`,   kind:'bars', s:series(3,14,.4), foot:'14 sequences'},
+  fieldnote:{label:'FIELDNOTE · ARR PIPELINE',     v:4.1, f:v=>`$${v.toFixed(1)}M`, kind:'line', s:series(11,32,.7), foot:'0 → seed → A'},
+  run:      {label:'MILES RUN · EMBARCADERO',      v:812, f:v=>`${Math.round(v)} mi`,kind:'bars', s:series(5,12,.1), foot:'Jan — Nov'},
+  film:     {label:'ROLLS SHOT · MOSTLY FOG',      v:36,  f:v=>`${Math.round(v)}`,   kind:'dots', s:series(9,36,0),  foot:'36 rolls · Portra 400'},
+  notes:    {label:'NOTEBOOK · ESSAYS',            v:48,  f:v=>`${Math.round(v)}`,   kind:'dots', s:series(13,48,0), foot:'on outbound, data, craft'},
+};
+const card = $('#card'), cvs = card.querySelector('canvas'), ctx = cvs.getContext('2d');
+const CW = cvs.width, CH = cvs.height;  // 2x for retina
+const ease = t => 1 - Math.pow(1 - t, 3);
+const ink = '#1C2030', mute = '#7C8296', accent = '#C8392E', rule = '#E4E7EE', paperC = '#FBFCFE';
+
+function drawCard(d, t) {
+  const p = ease(Math.min(1, t));
+  ctx.clearRect(0,0,CW,CH); ctx.fillStyle = paperC; ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle = mute; ctx.font = '500 17px "Geist Mono", monospace'; ctx.fillText(d.label, 26, 40);
+  ctx.fillStyle = ink; ctx.font = '400 64px "Instrument Serif", Georgia, serif'; ctx.fillText(d.f(d.v * p), 24, 108);
+  const x0 = 26, x1 = CW - 26, y0 = 136, y1 = CH - 50, w = x1 - x0, h = y1 - y0, n = d.s.length;
+  ctx.strokeStyle = rule; ctx.lineWidth = 1;
+  for (let i = 0; i <= 3; i++) { const y = y0 + h * i / 3; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke(); }
+  if (d.kind === 'line') {
+    const upto = Math.max(1, Math.floor(n * p));
+    ctx.beginPath();
+    for (let i = 0; i < upto; i++) { const x = x0 + w * i / (n - 1), y = y1 - h * d.s[i]; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.strokeStyle = accent; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+    const lx = x0 + w * (upto - 1) / (n - 1), ly = y1 - h * d.s[upto - 1];
+    ctx.fillStyle = accent; ctx.beginPath(); ctx.arc(lx, ly, 6, 0, Math.PI * 2); ctx.fill();
+  } else if (d.kind === 'bars') {
+    const bw = w / n * .62;
+    d.s.forEach((v, i) => { const k = Math.max(0, Math.min(1, p * 1.6 - i / n * .6)); const bh = h * v * ease(k);
+      ctx.fillStyle = i === n - 1 ? accent : '#C9CEDA'; ctx.fillRect(x0 + w * i / n + (w / n - bw) / 2, y1 - bh, bw, bh); });
+  } else {
+    const cols = 12, rows = Math.ceil(n / cols), gx = w / cols, gy = h / Math.max(rows, 3), shown = Math.floor(n * p);
+    for (let i = 0; i < n; i++) { ctx.fillStyle = i < shown ? (i === shown - 1 ? accent : ink) : rule;
+      ctx.beginPath(); ctx.arc(x0 + gx * (i % cols) + gx / 2, y0 + gy * ((i / cols) | 0) + gy / 2, 6, 0, Math.PI * 2); ctx.fill(); }
+  }
+  ctx.fillStyle = mute; ctx.font = '400 15px "Geist Mono", monospace'; ctx.fillText(d.foot, 26, CH - 20);
+  if (t < .55) {                       // scanline print-in: paper covers what isn't "printed" yet
+    const sy = CH * ease(t / .55);
+    ctx.fillStyle = paperC; ctx.fillRect(0, sy, CW, CH - sy);
+    ctx.fillStyle = accent; ctx.fillRect(0, sy, CW, 2);
+  }
+}
+
+const page = $('#page');
+const S = {x:0,y:0,tx:0,ty:0,r:0,tr:0,raf:0,t0:0,d:null,el:null};
+function loop(now) {
+  if (S.d) drawCard(S.d, (now - S.t0) / 700);
+  S.x += (S.tx - S.x) * .22; S.y += (S.ty - S.y) * .22; S.r += (S.tr - S.r) * .18;
+  card.style.transform = `translate(${S.x.toFixed(1)}px,${S.y.toFixed(1)}px) rotate(${S.r.toFixed(2)}deg)`;
+  S.raf = card.classList.contains('on') || Math.abs(S.tx - S.x) > .3 ? requestAnimationFrame(loop) : 0;
+}
+function aim(el, cx) {
+  const r = el.getBoundingClientRect(), cwid = 240, chgt = card.offsetHeight || 158;
+  const drift = Math.max(-60, Math.min(60, ((cx ?? r.left + r.width / 2) - (r.left + r.width / 2)) * .6));
+  S.tx = Math.max(12, Math.min(innerWidth - cwid - 12, r.left + r.width / 2 - cwid / 2 + drift));
+  S.ty = r.top - chgt - 14 < 12 ? r.bottom + 12 : r.top - chgt - 14;
+  S.tr = drift * .04;
+}
+function open(el, e) {
+  const d = PV[el.dataset.p]; if (!d) return;
+  if (S.el !== el) { S.t0 = performance.now(); S.d = d; }
+  const fresh = !card.classList.contains('on');
+  S.el = el; el.classList.add('hot'); page.classList.add('peek');
+  aim(el, e?.clientX);
+  if (fresh) { S.x = S.tx; S.y = S.ty + 6; }
+  card.classList.add('on');
+  if (reduce) { drawCard(d, 1); card.style.transform = `translate(${S.tx}px,${S.ty}px)`; }
+  else if (!S.raf) S.raf = requestAnimationFrame(loop);
+}
+function close(el) {
+  el.classList.remove('hot'); page.classList.remove('peek'); card.classList.remove('on'); S.el = null; S.d = null;
+}
+document.querySelectorAll('.lk').forEach(el => {
+  el.addEventListener('pointerenter', e => e.pointerType === 'mouse' && open(el, e));
+  el.addEventListener('pointermove', e => S.el === el && aim(el, e.clientX));
+  el.addEventListener('pointerleave', () => close(el));
+  el.addEventListener('focus', () => open(el));
+  el.addEventListener('blur', () => close(el));
+  el.addEventListener('click', e => e.preventDefault());   // dummy links
+});
+document.querySelectorAll('.dock a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+
+/* ══════════════════════════════════════════════════════════
+   The pond: an original pixel-art scene.
+   A small framebuffer is painted pixel by pixel (fixed palettes,
+   ordered dithering), scaled up with hard edges, and left transparent
+   toward the top so the ice dissolves into the page.
+   Static art is baked once per resize; actors are drawn every frame.
+   ══════════════════════════════════════════════════════════ */
+const scene = $('#scene'), cv = $('#pond'), g2 = cv.getContext('2d');
+const hintEl = $('#hint'), tallyEl = $('#tally'), bokehEl = $('#bokeh');
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const pack = (r, g, b) => ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;      // ABGR, little-endian
+const col = h => { const c = rgb(h); return pack(c[0], c[1], c[2]); };
+const ramp = s => s.split(' ').map(col);
+
+/* Palettes. Index 0 of the ice ramps is "paper": left transparent so the page shows through. */
+const ICE = [0, ...ramp('#E2E5EF #D5D9E8 #C6CBDF #B5BBD4 #A3AAC8 #9199BB #8189AE')];   // cool, lit
+const WRM = [0, ...ramp('#EFE3E7 #E9D4DC #E1C4D0 #D6B3C3 #C9A2B6 #BA92A9 #AA839C')];   // lit by the low sun
+const SHD = ramp('#D5DAF0 #C2C8E8 #B0B7DF #9EA6D5 #8D95CA #7C84BE #6C74B0 #5D65A0');   // in shadow
+const SHW = ramp('#D9D5EC #C9C2E2 #B8B0D8 #A89ECD #988DC1 #887CB4 #796DA6 #6A5F97');   // warm ice in shadow
+const mixc = (a, b) => pack(((a & 255) + (b & 255)) >> 1, (((a >> 8) & 255) + ((b >> 8) & 255)) >> 1, (((a >> 16) & 255) + ((b >> 16) & 255)) >> 1);
+const MID = ICE.map((c, i) => i ? mixc(c, WRM[i]) : 0), SHM = SHD.map((c, i) => mixc(c, SHW[i]));
+const RAMPS = [ICE, MID, WRM], SRAMPS = [SHD, SHM, SHW];
+const PAL = {
+  white: col('#FFFFFF'), snow: col('#F6F8FC'), snowHi: col('#FFF5EC'), snow1: col('#E3E8F4'), snow2: col('#CDD5EA'), snowSh: col('#BCC5E2'), snowSh2: col('#C9D1EA'),
+  scr: col('#F7F9FD'), scr2: col('#E9EDF6'), bark: col('#6B5A56'), barkD: col('#4E4245'), barkL: col('#8A7468'),
+  reed: col('#B9975A'), reedD: col('#9A7B47'), reedH: col('#5E4636'), wood: col('#8A6248'), woodM: col('#6B4A38'), woodD: col('#4C3429'),
+  red: col('#C8392E'), redD: col('#9F2B26'), skin: col('#F0C7A8'), coat: col('#F2E9D8'), coatD: col('#D8CDB8'), slate: col('#3A3F55'), boot: col('#2A2D3B'), blade: col('#DDE2EE'),
+  must: col('#D9A441'), mustD: col('#B58431'), teal: col('#2F6F73'), tealD: col('#245659'), dog: col('#D79A52'), dogD: col('#A8743A'), cream: col('#F4E3C6'),
+  coal: col('#2A2D3B'), carrot: col('#E8853A'), stone: col('#8E93A6'), stoneD: col('#6F7488'), leaf: col('#B98A5A'), leaf2: col('#A0683E'), gold: col('#FFE9A8')
+};
+
+/* Noise + ordered dither */
+const hash2 = (x, y) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+const vnoise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; };
+const fbm = (x, y) => vnoise(x, y) * .57 + vnoise(x * 2.03 + 17.1, y * 2.03 + 3.7) * .29 + vnoise(x * 4.1 + 5.3, y * 4.1 + 9.2) * .14;
+const mulberry = s => () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+const B4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + .5) / 16);
+const bay = (x, y) => B4[((y & 3) << 2) | (x & 3)];
+const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+/* The sun sits low, off the lower-left corner: every shadow falls right and a little up. */
+const TH = 20 * Math.PI / 180, LX = Math.cos(TH), LYv = -Math.sin(TH), NX = Math.sin(TH), NY = Math.cos(TH);
+
+/* Buffers */
+let W = 0, H = 0, K = 3, DPR = 1, img = null, buf = null;
+let base = null, shadeB = null;          // every pixel twice: lit, and as it looks in shadow
+let tone = null, warm = null, kind = null, inSh = null, trail = null, sm = null, rv = null, shore = null, G = null;
+const inb = (x, y) => x >= 0 && x < W && y >= 0 && y < H;
+const setObj = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (!inb(x, y)) return; const i = y * W + x; base[i] = c; shadeB[i] = c; kind[i] = 2; };
+const iceRamp = i => RAMPS[warm[i]], shRamp = i => SRAMPS[warm[i]];
+/* etch: a mark that sits lighter than the ice around it (scratches, bubbles, wind-blown snow) */
+function etch(x, y, n) {
+  x = Math.round(x); y = Math.round(y); if (!inb(x, y)) return; const i = y * W + x; if (kind[i] !== 0) return;
+  const t = tone[i], nt = t - n;
+  base[i] = nt <= 0 ? PAL.scr : iceRamp(i)[nt];
+  shadeB[i] = shRamp(i)[Math.max(0, t - 1)];
+}
+function deepen(x, y) {
+  x = Math.round(x); y = Math.round(y); if (!inb(x, y)) return; const i = y * W + x; if (kind[i] !== 0 || tone[i] < 2) return;
+  const t = Math.min(7, tone[i] + 1); base[i] = iceRamp(i)[t]; shadeB[i] = shRamp(i)[t];
+}
+function blit(rows, x0, y0, map, put) {
+  for (let j = 0; j < rows.length; j++) { const r = rows[j]; for (let i = 0; i < r.length; i++) { const ch = r[i]; if (ch !== '.' && map[ch] !== undefined) put(x0 + i, y0 + j, map[ch]); } }
+}
+
+/* ── Ground: the ice field and the snow banks ── */
+function bakeGround() {
+  const RW = clamp(W * .34, 70, 150), LW = clamp(W * .2, 40, 92), RH = H * .44, LH = H * .3;
+  shore = new Float32Array(W);
+  for (let x = 0; x < W; x++) {
+    let y = H - 6.5 + (vnoise(x * .07, 3.1) - .5) * 4;
+    if (x > W - RW) { const u = (x - (W - RW)) / RW; y -= RH * Math.pow(sstep(0, 1, u), 1.15) + (vnoise(x * .11, 8.8) - .5) * 5 * u; }
+    if (x < LW) { const u = 1 - x / LW; y -= LH * Math.pow(sstep(0, 1, u), 1.3) + (vnoise(x * .12, 5.5) - .5) * 4 * u; }
+    shore[x] = y;
+  }
+  G = { RW, LW, RH, LH };
+  const hN = (x, y) => vnoise(x * .03, y * .055 + 20) * .7 + vnoise(x * .075, y * .12 + 4) * .3;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, b = bay(x, y);
+    if (y >= shore[x]) {                                             // snow, modelled by a height field lit from the lower left
+      const rise = hN(x + 2.4, y - .9) - hN(x - 2.4, y + .9);
+      let c = PAL.snow;
+      if (rise < -.052 - b * .016) c = PAL.snow2; else if (rise < -.024 - b * .02) c = PAL.snow1; else if (rise > .05 + b * .03) c = PAL.snowHi;
+      if (y - shore[x] < 1.2) c = PAL.white;                         // the lip of the bank catches the light
+      base[i] = c; shadeB[i] = PAL.snowSh2; kind[i] = 1; tone[i] = 0; warm[i] = 0;
+      continue;
+    }
+    let t = 7.3 * Math.pow(sstep(H * .22, H * .95, y), .85);         // 0 = paper at the top, deep ice at the bottom
+    const k = Math.min(1, t / 2.6);
+    const band = sstep(.5, .72, vnoise((x * NX + y * NY) * .036, 2.2 + x * .002));   // light slipping between the trees
+    t += ((fbm(x * .017, y * .028 + 3) - .5) * 3 + (vnoise(x * .075, y * .1 + 11) - .5) * .9 + sstep(.6, .8, fbm(x * .03 + 40, y * .05 + 9)) * 1.3 - band * 1.15) * k;
+    const hsh = hash2(x * 3 + 1, y * 5 + 2);
+    if (hsh < .018) t -= 1; else if (hsh > .986) t += 1;              // frost grain
+    const ti = clamp(Math.floor(t + b), 0, 7);
+    const wf = sstep(W * .72, 0, x) * sstep(.25, 1, y / H) * .95 + band * .42 * sstep(.3, .6, y / H) - (vnoise(x * .05, y * .07 + 30) - .5) * .3;
+    const wm = Math.floor(clamp(wf, 0, 1) * 2 + bay(x + 2, y + 1) * .999);
+    tone[i] = ti; warm[i] = wm; kind[i] = 0;
+    base[i] = ti ? RAMPS[wm][ti] : 0;
+    shadeB[i] = SRAMPS[wm][ti];
+  }
+}
+
+/* ── Marks in the ice: everything that happened here before today ── */
+function arcPts(cx, cy, rx, ry, a0, a1, fn) {
+  const n = Math.ceil(Math.abs(a1 - a0) * Math.max(rx, ry) * 1.3) || 1;
+  for (let s = 0; s <= n; s++) { const a = a0 + (a1 - a0) * s / n; fn(cx + Math.cos(a) * rx, cy + Math.sin(a) * ry); }
+}
+function bakeMarks() {
+  // wind-blown snow gathers against the banks
+  for (let x = 0; x < W; x++) { const sy = shore[x];
+    for (let y = Math.max(0, (sy - 16) | 0); y < sy; y++) { if (kind[y * W + x] !== 0) continue;
+      const p = (1 - (sy - y) / 16) * (.25 + fbm(x * .045 + 60, y * .35) * 1.25); if (p > .55 + bay(x, y) * .5) etch(x, y, 3); } }
+  // old skate marks: arcs, figure eights, spins, long glides, each worn to a different degree
+  let rnd = mulberry(77);
+  for (let k = 0, n = Math.round(W * H / 2300); k < n; k++) {
+    const cx = rnd() * W, cy = H * (.46 + rnd() * .48), type = rnd(), str = .45 + rnd() * .5, dep = rnd() < .25 ? 2 : 1;
+    const put = (x, y) => { if (y > H * .4 && hash2((x * 7) | 0, (y * 13) | 0) < str) etch(x, y, dep); };
+    if (type < .45) { const r = 10 + rnd() * 46, a0 = rnd() * 6.28; arcPts(cx, cy, r, r * (.5 + rnd() * .3), a0, a0 + 1 + rnd() * 2.6, put); }
+    else if (type < .62) { const r = 7 + rnd() * 10; arcPts(cx - r, cy, r, r * .62, 0, 6.28, put); arcPts(cx + r, cy, r, r * .62, 0, 6.28, put); }
+    else if (type < .74) { const r0 = 2.5 + rnd() * 3; for (let a = 0; a < 12.5; a += .12) { const r = r0 * (.3 + a / 12.5); put(cx + Math.cos(a) * r, cy + Math.sin(a) * r * .7); } }
+    else { const ang = (rnd() - .5) * 1.1, len = 40 + rnd() * 120, bend = (rnd() - .5) * 12, x1 = cx + Math.cos(ang) * len, y1 = cy + Math.sin(ang) * len * .6;
+      for (let s = 0; s <= len; s++) { const u = s / len, x = cx + (x1 - cx) * u, y = cy + (y1 - cy) * u + Math.sin(u * Math.PI) * bend; put(x, y); if (dep === 2) put(x, y + 2); } }
+  }
+  // cracks: a bright hairline with a darker edge under it, branching as it wanders
+  rnd = mulberry(404);
+  const walk = (x, y, ang, len, depth) => {
+    for (let s = 0; s < len; s++) { ang += (rnd() - .5) * .5; x += Math.cos(ang); y += Math.sin(ang) * .7;
+      const xi = x | 0, yi = y | 0; if (!inb(xi, yi) || kind[yi * W + xi] !== 0 || tone[yi * W + xi] < 2) break;
+      etch(xi, yi, 2); deepen(xi, yi + 1);
+      if (depth < 2 && rnd() < .07) walk(x, y, ang + (rnd() < .5 ? 1 : -1) * (.6 + rnd() * .6), len * .45, depth + 1); }
+  };
+  for (let k = 0, n = Math.max(2, Math.round(W / 150)); k < n; k++) walk(W * (.15 + rnd() * .6), H * (.55 + rnd() * .33), rnd() * 6.28, 30 + rnd() * 50, 0);
+  for (let i = 0, n = W * H; i < n; i++) if (kind[i] === 0 && tone[i] >= 3 && hash2(i, 91) < .006) etch(i % W, (i / W) | 0, 3);     // snow grains
+  // air bubbles frozen in columns, and last autumn's leaves caught in the ice
+  rnd = mulberry(909);
+  for (let k = 0, n = Math.round(W * H / 700); k < n; k++) { const x = (rnd() * W) | 0, y = (H * (.4 + rnd() * .55)) | 0, i = y * W + x; if (!inb(x, y) || kind[i] !== 0 || tone[i] < 3) continue;
+    for (let j = 0, m = 1 + ((rnd() * 4) | 0); j < m; j++) etch(x + ((rnd() * 3) | 0) - 1, y - j * 2, 2); }
+  for (let k = 0, n = Math.round(W / 60); k < n; k++) { const x = (rnd() * W * .5) | 0, y = (H * (.5 + rnd() * .42)) | 0, i = y * W + x; if (!inb(x, y) || kind[i] !== 0 || tone[i] < 2) continue;
+    const c = rnd() < .5 ? PAL.leaf : PAL.leaf2; base[i] = c; shadeB[i] = PAL.leaf2; if (rnd() < .6 && inb(x + 1, y) && kind[i + 1] === 0) { base[i + 1] = c; shadeB[i + 1] = PAL.leaf2; } }
+}
+
+/* ── Shadows: tree silhouettes laid flat along the light and stretched by the low sun ── */
+function stamp(x, y, w, v) {
+  for (let k = -(w - 1) / 2; k <= (w - 1) / 2 + .01; k += .5) { const xi = Math.round(x + NX * k), yi = Math.round(y + NY * k); if (inb(xi, yi)) { const i = yi * W + xi; if (sm[i] < v) sm[i] = v; } }
+}
+function castTree(bx, by, hgt, seed, st) {
+  const rnd = mulberry(seed);
+  const grow = (u, v, ang, len, w, depth) => {
+    for (let s = 0; s < len; s += .3) { ang += (rnd() - .5) * .035; u += Math.cos(ang) * .3; v += Math.sin(ang) * .3;
+      const soft = clamp(1.3 - .62 * u / hgt, .56, 1);                 // the further from the trunk, the softer the edge
+      stamp(bx + LX * u * st + NX * v, by + LYv * u * st + NY * v, Math.max(1, w * (1 - .5 * s / len)), (255 * soft) | 0); }
+    if (depth >= 5 || len < 3) return;
+    const kids = depth === 0 ? 3 : (rnd() < .55 ? 2 : 3);
+    for (let c = 0; c < kids; c++) grow(u, v, ang * .6 + (c - (kids - 1) / 2) * (.62 + rnd() * .3) + (rnd() - .5) * .3, len * (.62 + rnd() * .2), Math.max(1, w - 1), depth + 1);
+  };
+  grow(0, 0, 0, hgt * .34, 4.2, 0);
+}
+/* a simple upright thing (bench, snowman, reed): a sheared box of shadow */
+function castBox(x0, yb, w, hgt, st, taper, v) {
+  for (let h = 0; h <= hgt; h += .5) { const ww = w * (1 - (taper || 0) * h / hgt), off = (w - ww) / 2;
+    for (let i = 0; i <= ww; i += .5) { const xi = Math.round(x0 + off + i + LX * h * st), yi = Math.round(yb + LYv * h * st); if (inb(xi, yi)) { const j = yi * W + xi; if (sm[j] < v) sm[j] = v; } } }
+}
+function applyShadows() {
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, v = sm[i]; if (!v || kind[i] === 2) continue;
+    let p = v / 255 * sstep(H * .33, H * .56, y); if (kind[i] === 1) p = p > .7 ? 1 : p * .8;     // shadows thin out as the ice turns to paper
+    if (p > bay(x, y) * .98 + .01) { base[i] = shadeB[i]; inSh[i] = 1; } }
+  // the near bank is a few centimetres high: it drops a thin shadow onto the ice behind it
+  for (let x = 1; x < W - 1; x++) { if (shore[x + 1] < shore[x] - .45) continue; const y = Math.floor(shore[x]) - 1; if (y < 1) continue;
+    for (const [dx, dy] of shore[x - 1] < shore[x] - .3 ? [[0, 0], [0, -1], [1, 0]] : [[0, 0]]) { const j = (y + dy) * W + x + dx; if (kind[j] === 0) { base[j] = shadeB[j]; inSh[j] = 1; } } }
+}
+
+/* ── A bare tree seen from above: limbs radiating from the trunk, snow resting on the upper sides ── */
+function crown(cx, cy, R, seed) {
+  const rnd = mulberry(seed);
+  const limb = (x, y, ang, len, depth) => {
+    for (let s = 0; s < len; s++) { ang += (rnd() - .5) * .17; x += Math.cos(ang); y += Math.sin(ang) * .8;
+      const xi = Math.round(x), yi = Math.round(y); if (!inb(xi, yi)) continue;
+      if (depth === 0) { setObj(xi, yi + 1, PAL.barkD); setObj(xi, yi - 1, hash2(xi * 3, yi * 7) < .75 ? PAL.snow : PAL.bark); }
+      setObj(xi, yi, depth < 2 ? PAL.barkD : depth < 3 ? PAL.bark : PAL.barkL);
+      if (depth === 1 && hash2(xi * 3, yi * 7) < .45) setObj(xi, yi - 1, PAL.snow); }
+    if (depth >= 4 || len < 3) return;
+    const kids = rnd() < .65 ? 2 : 3;
+    for (let c = 0; c < kids; c++) limb(x, y, ang + (c - (kids - 1) / 2) * (.7 + rnd() * .3) + (rnd() - .5) * .3, len * (.58 + rnd() * .2), depth + 1);
+  };
+  const limbs = 5 + ((rnd() * 3) | 0);
+  for (let l = 0; l < limbs; l++) limb(cx, cy, l / limbs * 6.283 + rnd() * .5, R * (.34 + rnd() * .14), 0);
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) setObj(cx + dx, cy + dy, dx + dy < 0 ? PAL.barkL : PAL.barkD);
+  setObj(cx - 1, cy - 1, PAL.snow);
+}
+
+/* ── Props on the banks ── */
+const BENCH = ['.WWWWWWWWWWWWWWW.', 'DBBBBBBBBBBBBBBBD', 'DbbbbbbbbbbbbbbbD', 'D.sssssssssssss.D', 'DBBBBBBBBBBBBBBBD', 'DbbbbbbbbbbbbbbbD', 'D...............D', 'D...............D'];
+const SNOWMAN = ['..KKK..', '.KKKKK.', '..WWw..', '.WkWkw.', '.WWOWw.', '..RRR..', 'tWWWWwt', '.WWkWw.', 'WWWWWww', 'WWWkWww', '.Wwwww.'];
+const ROCK = ['.WW.', 'SSss', 'Ssss'], PACK = ['.TT.', 'TTTT', 'TtTT', 'TTTT', 'tttt'], BOOTS = ['K..K.', 'KK.KK', 'KK.KK'];
+const SHRUB = ['..t.t..', '.tRt.t.', 't.ttRt.', '.tttt..', '..tt...'];
+function layoutProps() {
+  const { RW, LW } = G, rnd = mulberry(5150), sy = x => shore[clamp(Math.round(x), 0, W - 1)];
+  const bx = Math.round(W - RW * .44 - 8), by = H - 27;
+  G.bench = { x: bx, y: by }; G.spec = { x: bx + 3, y: by - 6 }; G.dog = { x: bx - 9, y: by + 1 };
+  G.snowman = { x: Math.round(W - RW * .15), y: H - 46 }; G.bird = { x: Math.round(W - RW * .34), y: Math.round(sy(W - RW * .34)) + 12, dx: 6 }; G.pack = { x: bx + 19, y: by + 3 };
+  const ex = Math.round(W - RW * .8); G.boots = { x: ex, y: Math.round(sy(ex)) + 2 };
+  G.rocks = [[Math.round(W - RW * .97), 1], [Math.round(W * .24), 2], [Math.round(W * .52), 1]].map(([x, d]) => ({ x, y: Math.round(sy(x)) + d }));
+  G.shrub = { x: Math.round(LW * .55), y: Math.round(sy(LW * .55)) + 6 };
+  G.trees = [{ x: W * .05, y: H - 18, h: 64, seed: 11, crown: 21 }, { x: Math.max(W * .125, 34), y: H - 8, h: 78, seed: 23, crown: 24 },
+    { x: W * .37, y: H + 18, h: 92, seed: 37 }, { x: W - 9, y: H - 4, h: 48, seed: 77, crown: 17 }];
+  if (W > 260) G.trees.push({ x: -26, y: H * .7, h: 70, seed: 51 }, { x: W * .6, y: H + 24, h: 74, seed: 63 });
+  G.reeds = [];
+  for (const cx of [W - RW * .92, W - RW * .66, W - RW * .3, W - RW * .1, LW * .8, LW * .35, W * .3, W * .47, W * .6]) {
+    for (let k = 0, n = 3 + ((rnd() * 4) | 0); k < n; k++) { const x = Math.round(cx + (rnd() - .5) * 9); if (x < 1 || x >= W - 1) continue;
+      G.reeds.push({ x, y: Math.floor(sy(x)) + 1 + ((rnd() * 2) | 0), h: 5 + ((rnd() * 5) | 0), ph: rnd() * 6.28, head: rnd() < .6, dark: rnd() < .4 }); }
+  }
+}
+function bakeProps() {
+  const snowPut = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (inb(x, y) && kind[y * W + x] === 1) base[y * W + x] = c; };
+  // footprints: in from the right, to the bench, then down to the ice where the boots were left
+  const b = G.bench, e = G.boots, pts = [[W + 2, b.y + 13], [b.x + 22, b.y + 11], [b.x - 2, b.y + 11], [e.x + 6, e.y + 4], [e.x + 2, e.y + 1]];
+  for (let s = 0, k = 0; s < pts.length - 1; s++) { const [x0, y0] = pts[s], [x1, y1] = pts[s + 1], len = Math.hypot(x1 - x0, y1 - y0);
+    for (let d = 0; d < len; d += 3, k++) { const u = d / len, side = (k & 1) ? 1 : -1, nx = -(y1 - y0) / len, ny = (x1 - x0) / len;
+      snowPut(x0 + (x1 - x0) * u + nx * side, y0 + (y1 - y0) * u + ny * side, PAL.snowSh); } }
+  blit(BENCH, b.x, b.y, { W: PAL.white, B: PAL.wood, b: PAL.woodM, s: PAL.woodD, D: PAL.woodD }, setObj);
+  blit(SNOWMAN, G.snowman.x, G.snowman.y, { K: PAL.coal, W: PAL.white, w: PAL.snow2, k: PAL.coal, O: PAL.carrot, R: PAL.red, t: PAL.bark }, setObj);
+  blit(PACK, G.pack.x, G.pack.y, { T: PAL.teal, t: PAL.tealD }, setObj);
+  blit(BOOTS, e.x, e.y, { K: PAL.boot }, setObj);
+  blit(SHRUB, G.shrub.x, G.shrub.y, { t: PAL.barkL, R: PAL.red }, setObj);
+  for (const r of G.rocks) blit(ROCK, r.x, r.y, { W: PAL.white, S: PAL.stone, s: PAL.stoneD }, setObj);
+}
+
+function bake() {
+  const n = W * H;
+  base = new Uint32Array(n); shadeB = new Uint32Array(n); tone = new Uint8Array(n); warm = new Uint8Array(n); kind = new Uint8Array(n);
+  inSh = new Uint8Array(n); trail = new Uint8Array(n); sm = new Uint8Array(n); rv = new Uint8Array(n);
+  bakeGround(); layoutProps(); bakeMarks();
+  for (const t of G.trees) castTree(t.x, t.y, t.h, t.seed, 1.9);
+  castBox(G.bench.x, G.bench.y + 8, 17, 7, 1.5, 0, 230); castBox(G.spec.x, G.bench.y + 8, 7, 13, 1.5, .2, 220);
+  castBox(G.dog.x, G.dog.y + 6, 6, 5, 1.5, .3, 220); castBox(G.snowman.x, G.snowman.y + 11, 7, 10, 1.5, .5, 230);
+  castBox(G.pack.x, G.pack.y + 5, 4, 4, 1.5, 0, 220); castBox(G.shrub.x, G.shrub.y + 5, 7, 4, 1.5, .4, 170);
+  for (const r of G.rocks) castBox(r.x, r.y + 3, 4, 2, 1.5, 0, 220);
+  for (const r of G.reeds) castBox(r.x, r.y, 1, r.h, 1.6, 0, 150);
+  applyShadows();
+  bakeProps();
+  for (const t of G.trees) if (t.crown) crown(Math.round(t.x), Math.round(t.y), t.crown, t.seed + 1);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) rv[y * W + x] = (vnoise(x * .05, y * .08 + 70) * .5 + bay(x, y) * .5) * 255;
+}
+function resize() {
+  DPR = devicePixelRatio || 1;
+  K = Math.max(1, Math.round((innerWidth < 640 ? 2 : innerWidth >= 2200 ? 4 : 3) * DPR));     // whole device pixels per art pixel: always square, never blurred
+  W = Math.ceil(innerWidth * DPR / K); H = Math.ceil((scene.clientHeight || 400) * DPR / K);
+  cv.width = W; cv.height = H; cv.style.width = (W * K / DPR) + 'px'; cv.style.height = (H * K / DPR) + 'px';
+  img = g2.createImageData(W, H); buf = new Uint32Array(img.data.buffer);
+  bake(); initActors();
+}
+
+/* ── The skater ── */
+const F = {
+  G1: ['....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '.SSSSS.....', 'S..CCCM....', '...CCC.....', '..MCCc.....', '...cCc.....', '...T.TT....', '..TT...T...', '.KK....KK..', '.BBB...BBB.'],
+  G2: ['...........', '....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '.SSSSS.....', 'S..CCCM....', '..MCCC.....', '...cCc.....', '...cTc.....', '...TT......', '...KKK.....', '..BBBBB....'],
+  W1: ['...P.......', '..HHH..M...', '.hhhh..C...', '..FFe.C....', 'MSSSSC.....', '.C.CCC.....', '...CCC.....', '...CCc.....', '...cCc.....', '...T.T.....', '..T...T....', '.KK...KK...', 'BBB...BBB..'],
+  W2: ['......P....', '.....HHH...', '....hhhh...', '.....FFe...', '...SSSSS...', '..SCCCC.M..', '...CCCCC...', '.M.CCc.....', '..CcCc.....', '...T.T.....', '...T..T....', '..KK..KK...', '.BBB..BBB..'],
+  DOWN: ['....M........', '....C...TK...', '.HH.CC.TT.B..', 'PHHFSCCT.....', '.HH.CC.TT.B..', '....C...TK...', '....M........'],
+  SIT: ['...P.......', '..HHH......', '.hhhh......', '..FFe......', '.SSSS......', '..CCCM.....', '..CCCTTTK..', '.MCcTTTTKB.'],
+  KNEEL: ['....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '..SSSS.....', '...CCCC....', '...CCc.M...', '..TTCc.....', '.TT.TT.....', '.K...TK....', 'BB...BBB...'],
+  RISE: ['....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '.MSSSSM....', '..CCCCC....', '...CCC.....', '...cCc.....', '...T.T.....', '..T...T....', '.KK...KK...', 'BBB...BBB..'],
+  BR1: ['....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '..SSSS.....', '...CCC.....', '..MCCCM....', '...CcC.....', '...cCc.....', '...T.T.....', '...T.T.....', '..KK.KK....', '.BBB.BBB...'],
+  BR2: ['....P......', '...HHH.....', '..hhhh.....', '...FFe.....', '..SSSS.....', '...CCC.....', '...CCC.....', '..MCcCM....', '...cCc.....', '...T.T.....', '...T.T.....', '..KK.KK....', '.BBB.BBB...'],
+  JUMP: ['..M.P.M....', '..CHHHC....', '..hhhh.....', '...FFe.....', '..SSSS.....', '...CCC.....', '...CCC.....', '...cCc.....', '...TTT.....', '..KKTT.....', '.BBBKK.....', '...BBB.....']
+};
+const SKM = { P: PAL.white, H: PAL.red, h: PAL.redD, e: PAL.boot, F: PAL.skin, S: PAL.red, C: PAL.coat, c: PAL.coatD, M: PAL.red, T: PAL.slate, K: PAL.boot, B: PAL.blade };
+const sk = { x: 0, y: 0, a: 0, v: 0, mode: 'brush', t: 0, dur: 1, face: 1, ph: 0, foot: 1, z: 0, vz: 0, skill: 0, falls: 0, landed: 0, tx: 0, ty: 0, slide: 0 };
+const react = { gasp: 0, clap: 0, bark: 0 };
+let rndA = mulberry(8), flakes = [], sparks = [], parts = [], fish = [], marker = null;
+const DUR = { wobble: .8, sit: .7, kneel: .65, rise: .8, brush: .75 };
+
+function drawSprite(rows, x, y, ax, flip, map) {            // (x, y) is where the feet touch the ice
+  const h = rows.length, X = Math.round(x), Y = Math.round(y);
+  for (let j = 0; j < h; j++) { const r = rows[j]; for (let i = 0; i < r.length; i++) { const ch = r[i]; if (ch === '.') continue;
+    const px = X + (flip ? ax - i : i - ax), py = Y - (h - 1 - j); if (inb(px, py)) buf[py * W + px] = map[ch]; } }
+}
+function dropShadow(rows, x, y, ax, flip, st) {              // the same silhouette, laid along the light
+  const h = rows.length, X = Math.round(x), Y = Math.round(y);
+  for (let j = 0; j < h; j++) { const r = rows[j]; for (let i = 0; i < r.length; i++) { if (r[i] === '.') continue;
+    for (let q = 0; q < 2; q++) { const hh = h - 1 - j + q * .5, px = Math.round(X + (flip ? ax - i : i - ax) + LX * hh * st), py = Math.round(Y + LYv * hh * st);
+      if (!inb(px, py)) continue; const k = py * W + px; if (kind[k] === 2 || (hh > 8 && bay(px, py) > .7)) continue; buf[k] = shadeB[k]; } } }
+}
+const iceAt = (x, y) => { x = Math.round(x); y = Math.round(y); return inb(x, y) && kind[y * W + x] === 0 && tone[y * W + x] >= 3; };
+function canSkate(x, y) {
+  if (y < H * .5 || !(iceAt(x, y) && iceAt(x - 7, y) && iceAt(x + 7, y) && iceAt(x, y + 5) && iceAt(x, y - 4))) return false;
+  for (const t of G.trees) if (t.crown && Math.hypot(x - t.x, (y - t.y) / .8) < t.crown * .62 + 6) return false;      // stay out from under the branches
+  return true;
+}
+function pickTarget(near) {
+  for (let k = 0; k < 60; k++) { const x = 10 + rndA() * (W - 20), y = H * .52 + rndA() * (H * .48 - 10), d = Math.hypot(x - sk.x, y - sk.y);
+    if (canSkate(x, y) && d > (near ? 14 : 28) && (!near || d < 70)) { sk.tx = x; sk.ty = y; return; } }
+  sk.tx = W * .5; sk.ty = H * .74;
+}
+const mark = (x, y, v) => { x = Math.round(x); y = Math.round(y); if (inb(x, y)) { const i = y * W + x; if (kind[i] === 0 && trail[i] < v) trail[i] = v; } };
+function spray(x, y, n, c) {
+  for (let k = 0; k < n; k++) { const a = rndA() * 6.283, sp = 8 + rndA() * 28; parts.push({ x, y: y - 1, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7 - 4, life: .4 + rndA() * .55, age: 0, c: c && rndA() < .6 ? c : PAL.white }); }
+}
+function scuff(x, y) {                                       // every fall leaves its mark on the ice
+  for (let k = 0; k < 30; k++) { const a = rndA() * 6.283, r = Math.sqrt(rndA()) * 5; mark(x + Math.cos(a) * r, y + Math.sin(a) * r * .7, 255); }
+  for (let k = 0; k < 5; k++) { const a = rndA() * 6.283, len = 4 + rndA() * 5; for (let s = 3; s < 3 + len; s++) mark(x + Math.cos(a) * s, y + Math.sin(a) * s * .7, 215); }
+}
+const pad2 = n => String(Math.min(99, n)).padStart(2, '0');
+const tally = () => flap(tallyEl, `FALLS ${pad2(sk.falls)} · LANDED ${pad2(sk.landed)}`, 14);
+function setMode(m) {
+  const s = sk; s.mode = m; s.t = 0;
+  if (m === 'skate') { s.dur = 2.2 + rndA() * 3.4 + s.skill * 5; s.ph = 0; if (s.v < 4) s.v = 4; }
+  else if (m === 'down') { s.dur = 1.5 + rndA() * .8; s.slide = s.v * .9; s.v = 0; s.z = 0; s.falls++; tally(); react.gasp = .95; react.bark = .7; spray(s.x, s.y, 22); scuff(s.x, s.y); }
+  else if (m === 'jump') { s.vz = 27; s.z = .01; mark(s.x, s.y, 255); mark(s.x - s.face, s.y, 255); }
+  else s.dur = DUR[m];
+}
+function stepSkater(dt) {
+  const s = sk; s.t += dt;
+  const move = d => { const nx = s.x + Math.cos(s.a) * d, ny = s.y + Math.sin(s.a) * d * .7; if (iceAt(nx, ny) && iceAt(nx, ny + 3)) { s.x = nx; s.y = ny; return true; } return false; };
+  const px = -Math.sin(s.a), py = Math.cos(s.a) * .7;
+  if (s.mode === 'skate') {
+    let d = Math.atan2((s.ty - s.y) / .7, s.tx - s.x) - s.a; d = Math.atan2(Math.sin(d), Math.cos(d));
+    s.a += clamp(d, -2.1 * dt, 2.1 * dt);
+    s.ph += dt / .62; if (s.ph >= 1) { s.ph -= 1; s.foot = -s.foot; s.v = Math.min(24 + s.skill * 7, s.v + 6.5); }
+    s.v *= Math.exp(-.5 * dt);
+    if (!canSkate(s.x + Math.cos(s.a) * 12, s.y + Math.sin(s.a) * 8)) { pickTarget(true); s.v *= Math.exp(-1.5 * dt); }
+    if (!move(s.v * dt)) { s.a += 2.6 * dt; s.v *= .9; }
+    if (Math.hypot(s.tx - s.x, (s.ty - s.y) / .7) < 7) { pickTarget(); marker = null; }
+    if (Math.abs(Math.cos(s.a)) > .25) s.face = Math.cos(s.a) > 0 ? 1 : -1;
+    mark(s.x - px * 1.3 * s.foot, s.y - py * 1.3 * s.foot, 255);                              // the gliding foot draws a clean line
+    if (s.ph < .6) { const q = s.ph / .6; mark(s.x + px * (1.3 + 2.6 * q) * s.foot - Math.cos(s.a) * q * 2, s.y + py * (1.3 + 2.6 * q) * s.foot - Math.sin(s.a) * q * 1.4, 215); }   // the pushing foot sweeps out
+    if (s.t > s.dur) setMode('wobble');
+  } else if (s.mode === 'wobble') {
+    s.v *= Math.exp(-1.1 * dt); s.a += Math.sin(s.t * 19) * 1.4 * dt; move(s.v * dt);
+    mark(s.x + (rndA() - .5) * 4, s.y + (rndA() - .5) * 3, 235);                              // blades scribbling for grip
+    if (s.t > s.dur) setMode(rndA() < .18 + s.skill * .25 ? 'skate' : 'down');
+  } else if (s.mode === 'down') {
+    if (s.slide > .5) { s.slide *= Math.exp(-3.2 * dt); if (move(s.slide * dt)) for (let k = -1; k <= 1; k++) mark(s.x + px * k * 1.6, s.y + py * k * 1.6, 175); }
+    if (s.t > s.dur) setMode('sit');
+  } else if (s.mode === 'jump') {
+    s.z += s.vz * dt; s.vz -= 72 * dt; move(s.v * dt);
+    if (s.z <= 0) { s.z = 0; mark(s.x, s.y, 255); mark(s.x + s.face, s.y, 255);
+      if (rndA() < .32 + s.skill * .45) { s.landed++; s.skill = Math.min(1, s.skill + .05); react.clap = 1.3; spray(s.x, s.y, 12, PAL.gold); tally(); setMode('skate'); s.v += 3; }
+      else setMode('down'); }
+  } else if (s.t > s.dur) {
+    if (s.mode === 'sit') setMode('kneel'); else if (s.mode === 'kneel') setMode('rise'); else if (s.mode === 'rise') { setMode('brush'); react.clap = 1.1; }
+    else { s.skill = Math.min(1, s.skill + .07); pickTarget(); setMode('skate'); }
+  }
+}
+function skFrame() {
+  const s = sk;
+  switch (s.mode) {
+    case 'skate': return [s.ph < .55 ? F.G1 : F.G2, s.ph < .55 ? 5 : 4];
+    case 'wobble': return (Math.floor(s.t / .1) & 1) ? [F.W1, 4] : [F.W2, 5];
+    case 'down': return [F.DOWN, 6];
+    case 'sit': return [F.SIT, 4];
+    case 'kneel': return [F.KNEEL, 4];
+    case 'rise': return [F.RISE, 4];
+    case 'jump': return [F.JUMP, 4];
+    default: return [(Math.floor(s.t / .18) & 1) ? F.BR1 : F.BR2, 4];
+  }
+}
+
+/* ── Ambient life and the frame ── */
+const SPEC = ['..TTT..', '.TTTTT.', '.TtTtT.', '.YYYYY.', 'YYYYYYY', 'YyYYYyY'];
+const DOG = ['.E..E.', '.OOOO.', '.OOOO.', 'OOOOOO', 'OOOOOO', 'OC..CO'];
+const SPM = { T: PAL.teal, t: PAL.tealD, Y: PAL.must, y: PAL.mustD }, DGM = { E: PAL.dogD, O: PAL.dog, C: PAL.cream };
+const put = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (inb(x, y)) buf[y * W + x] = c; };
+let REV = reduce ? 1 : 0, rev0 = 0, lastF = 0, frameNo = 0;
+
+function initActors() {
+  rndA = mulberry(8);
+  sk.x = W * .5; sk.y = H * .74;
+  for (let k = 0; k < 300 && !canSkate(sk.x, sk.y); k++) { sk.x = 10 + rndA() * (W - 20); sk.y = H * (.55 + rndA() * .38); }
+  sk.a = 0; sk.v = 0; sk.z = 0; pickTarget(); setMode('brush');
+  flakes = Array.from({ length: Math.round(W * H / 420) }, () => ({ x: rndA() * W, y: rndA() * H, vx: 3 + rndA() * 5, vy: 5 + rndA() * 7, ph: rndA() * 6.28, big: rndA() < .14, th: rndA() }));
+  sparks = Array.from({ length: Math.max(6, Math.round(W / 16)) }, () => ({ x: -1, y: 0, t0: -9, life: 0, c: PAL.white }));
+  fish = Array.from({ length: W > 260 ? 3 : 1 }, (_, k) => ({ x: W * (.32 + .18 * k), y: H * (.74 + .07 * k), a: rndA() * 6.28, ph: rndA() * 6 }));
+  parts = []; marker = null;
+}
+
+function paint(t, dt) {
+  buf.set(base);
+  // fish, slow and dark under the clearest ice
+  for (const f of fish) {
+    f.a += Math.sin(t * .3 + f.ph) * .4 * dt;
+    const nx = f.x + Math.cos(f.a) * 3.2 * dt, ny = f.y + Math.sin(f.a) * 2.2 * dt, ni = (ny | 0) * W + (nx | 0);
+    if (nx > 6 && nx < W - 6 && inb(nx | 0, ny | 0) && kind[ni] === 0 && tone[ni] >= 4) { f.x = nx; f.y = ny; } else f.a += 4.5 * dt;
+    const wag = Math.sin(t * 5 + f.ph), ca = Math.cos(f.a), sa = Math.sin(f.a);
+    for (let s = -2; s <= 3; s++) { const lat = s === 3 ? wag * 1.2 : s === 2 ? wag * .5 : 0, fx = Math.round(f.x - ca * s - sa * lat), fy = Math.round(f.y - sa * s * .7 + ca * lat * .7);
+      for (let w = 0; w < (s >= -1 && s <= 1 ? 2 : 1); w++) { if (!inb(fx, fy + w)) continue; const i = (fy + w) * W + fx; if (kind[i] === 0 && tone[i] >= 3 && !inSh[i] && bay(fx, fy + w) < .72) buf[i] = shadeB[i]; } }
+  }
+  // blade marks: bright when fresh, then worn into the ice over about a minute
+  const decay = (frameNo & 7) === 0;
+  for (let y = (H * .3) | 0; y < H; y++) { const row = y * W; for (let x = 0; x < W; x++) { const i = row + x, v = trail[i]; if (!v) continue;
+    if (decay) trail[i] = v - 1;
+    const tn = tone[i];
+    if (v > 190) buf[i] = inSh[i] ? PAL.scr2 : PAL.white;
+    else if ((v - 20) / 170 > bay(x, y) * .85) buf[i] = inSh[i] ? shRamp(i)[Math.max(0, tn - 2)] : (tn > 2 ? iceRamp(i)[tn - 2] : PAL.scr); } }
+  // where you asked him to go
+  if (marker) { const p = (t - marker.t0) / .7;
+    if (p < 1) for (let a = 0; a < 6.283; a += .2) { const mx = Math.round(marker.x + Math.cos(a) * (2 + p * 7)), my = Math.round(marker.y + Math.sin(a) * (2 + p * 7) * .7); if (inb(mx, my) && kind[my * W + mx] === 0 && bay(mx, my) > p * .9) buf[my * W + mx] = PAL.white; }
+    put(marker.x, marker.y, PAL.red); }
+  // reeds lean with the wind
+  for (const r of G.reeds) { const sway = Math.sin(t * 1.3 + r.ph + r.x * .05) * 1.5 + Math.sin(t * 3.1 + r.ph) * .4;
+    for (let k = 0; k < r.h; k++) put(r.x + (k > r.h * .5 ? Math.round(sway * (k / r.h - .4)) : 0), r.y - k, r.head && k >= r.h - 2 ? PAL.reedH : r.dark ? PAL.reedD : PAL.reed); }
+  // the spectator follows him with their head, throws their arms up when he falls, claps when he is back up
+  const sp = G.spec, look = clamp(Math.round((sk.x - (sp.x + 3)) / 60), -1, 1);
+  for (let j = 0; j < SPEC.length; j++) for (let i = 0; i < 7; i++) { const ch = SPEC[j][i]; if (ch !== '.') put(sp.x + i + (j < 3 ? look : 0), sp.y + j, SPM[ch]); }
+  if (react.gasp > 0) { for (const sx of [-1, 7]) { put(sp.x + sx, sp.y + 3, PAL.must); put(sp.x + sx, sp.y + 2, PAL.must); put(sp.x + sx, sp.y + 1, PAL.red); }
+    for (const dy of [-2, -4, -5]) put(sp.x + 3 + look, sp.y + dy, PAL.red); }
+  else if (react.clap > 0) { if (Math.floor(t / .12) & 1) { put(sp.x + 2, sp.y - 1, PAL.red); put(sp.x + 4, sp.y - 1, PAL.red); } else { put(sp.x - 1, sp.y + 2, PAL.red); put(sp.x + 7, sp.y + 2, PAL.red); } }
+  { const q = ((t + .6) % 3.1) / 3.1; if (q < .2) put(sp.x + 3 + look * 2 + q * 12, sp.y + 1 - q * 9, PAL.white); }                     // their breath
+  { const cyc = (t * .2) % 2, seg = cyc | 0, fr2 = cyc - seg, hop = fr2 > .9 ? (fr2 - .9) / .1 : 0, pos = seg ? 1 - hop : hop, dir = seg ? -1 : 1;   // a robin hops between two spots
+    const bx = Math.round(G.bird.x + G.bird.dx * pos), by = Math.round(G.bird.y - Math.sin(hop * Math.PI) * 2.5), peck = !hop && ((t * 1.7) % 3) < .25 ? 1 : 0;
+    put(bx - dir, by, PAL.bark); put(bx, by, PAL.barkL); put(bx + dir, by, PAL.carrot); put(bx + dir, by - 1 + peck, PAL.barkD); }
+  const dg = G.dog, up = react.bark > 0 ? 1 : 0, wag = Math.floor(t / (up ? .09 : .26)) & 1;
+  for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) { const ch = DOG[j][i]; if (ch !== '.') put(dg.x + i, dg.y + j - up, DGM[ch]); }
+  put(dg.x + 6, dg.y + (wag ? 3 : 4), PAL.dog); put(dg.x + 7, dg.y + (wag ? 2 : 4), PAL.dogD);
+  if (up && wag) { put(dg.x - 2, dg.y - 1, PAL.coal); put(dg.x - 3, dg.y - 2, PAL.coal); put(dg.x - 2, dg.y + 1, PAL.coal); }
+  // the skater: shadow first, then the figure
+  const [fr, ax] = skFrame(), flip = sk.face < 0, jx = sk.mode === 'rise' ? Math.round(Math.sin(t * 30) * .6) : 0;
+  dropShadow(fr, sk.x + jx + LX * sk.z * 1.5, sk.y + LYv * sk.z * 1.5, ax, flip, sk.mode === 'down' ? 1.2 : 1.5);
+  drawSprite(fr, sk.x + jx, sk.y - sk.z, ax, flip, SKM);
+  if (sk.mode === 'down' && sk.t < 1.2) for (let k = 0; k < 3; k++) { const a = t * 7 + k * 2.094; put(sk.x + (flip ? 5 : -5) + Math.cos(a) * 4, sk.y - 6 + Math.sin(a) * 1.6, k ? PAL.gold : PAL.white); }   // seeing stars
+  if (sk.mode === 'brush' || sk.mode === 'kneel' || sk.mode === 'sit') { const q = (t % 1.3) / 1.3; if (q < .5) { put(sk.x + sk.face * (3 + q * 8), sk.y - 9 - q * 5, PAL.white); if (q < .3) put(sk.x + sk.face * (4 + q * 8), sk.y - 9 - q * 5, PAL.white); } }   // breath in the cold
+  // ice spray
+  for (let k = parts.length - 1; k >= 0; k--) { const p = parts[k]; p.age += dt; if (p.age > p.life) { parts.splice(k, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= Math.exp(-3 * dt); p.vy = p.vy * Math.exp(-3 * dt) + 6 * dt;
+    if (1 - p.age / p.life > bay(p.x | 0, p.y | 0) * .8) put(p.x, p.y, p.c); }
+  // glints where the sun catches the ice
+  for (const s of sparks) { const age = t - s.t0;
+    if (age > s.life) { const x = (rndA() * W) | 0, y = (H * (.42 + rndA() * .56)) | 0, i = y * W + x; s.t0 = t + rndA() * .8; s.life = .35 + rndA() * .4; s.x = -1;
+      if (y < H && kind[i] === 0 && tone[i] >= 2 && !inSh[i]) { s.x = x; s.y = y; s.c = warm[i] > 1 ? PAL.gold : PAL.white; } continue; }
+    if (age < 0 || s.x < 0) continue; const q = age / s.life;
+    put(s.x, s.y, PAL.white);
+    if (q > .3 && q < .7) { put(s.x - 1, s.y, s.c); put(s.x + 1, s.y, s.c); put(s.x, s.y - 1, s.c); put(s.x, s.y + 1, s.c); } }
+  // falling snow, thinning out where the ice becomes the page
+  for (const f of flakes) { f.x += (f.vx + Math.sin(t * 1.4 + f.ph) * 3) * dt; f.y += f.vy * dt; if (f.y >= H) { f.y = H * .2; f.x = rndA() * W; } if (f.x >= W) f.x -= W;
+    const x = f.x | 0, y = f.y | 0; if (f.th > sstep(H * .26, H * .52, y)) continue;
+    buf[y * W + x] = PAL.white; if (f.big && x + 1 < W) buf[y * W + x + 1] = PAL.white; }
+  if (REV < 1) { const cut = REV * 1.12 * 255; for (let i = 0, n = W * H; i < n; i++) if (rv[i] >= cut) buf[i] = 0; }   // the pond frosts into view
+  g2.putImageData(img, 0, 0);
+}
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (now - lastF < 31) return;                 // ~30fps: reads as hand-animated, easy on the battery
+  const dt = Math.min(.05, (now - lastF) / 1000); lastF = now; frameNo++;
+  if (REV < 1 && root.classList.contains('s4')) { rev0 = rev0 || now; REV = Math.min(1, (now - rev0) / 1800); }
+  react.gasp -= dt; react.clap -= dt; react.bark -= dt;
+  if (REV > .6) stepSkater(dt);
+  paint(now / 1000, dt);
+}
+
+/* ── Input: click the ice and he will try to get there; space asks for a jump ── */
+let usedOnce = false, rsT = 0;
+const used = () => { if (!usedOnce) { usedOnce = true; hintEl.classList.remove('on'); } };
+addEventListener('pointerdown', e => {
+  if (reduce || !buf || e.target.closest?.('a,button,.else,.lk,.name')) return;
+  const r = cv.getBoundingClientRect(); let x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+  if (y < H * .46 || !iceAt(x, y)) return;
+  for (let k = 0; k < 14 && !canSkate(x, y); k++) { x += (W * .5 - x) * .12; y += (H * .76 - y) * .12; }
+  if (!canSkate(x, y)) return;
+  sk.tx = x; sk.ty = y; marker = { x, y, t0: performance.now() / 1000 };
+  if (sk.mode === 'skate') sk.dur = Math.max(sk.dur, sk.t + 2.5);
+  used();
+});
+addEventListener('keydown', e => {
+  if (e.code !== 'Space' || reduce || e.target.closest?.('input,textarea,button,a,[contenteditable]')) return;
+  e.preventDefault(); if (sk.mode === 'skate') setMode('jump'); used();
+});
+addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { resize(); if (reduce) paint(0, 0); }, 140); });
+if (matchMedia('(hover: none)').matches) hintEl.textContent = 'TAP THE ICE · HE WILL TRY TO GET THERE';
+setTimeout(() => { if (!usedOnce && !reduce) hintEl.classList.add('on'); }, 5200);
+
+/* Snow close to the lens */
+{ const br = mulberry(415);
+  for (let i = 0; i < 18; i++) { const el = document.createElement('i'), s = 7 + br() ** 2 * 42;
+    el.style.cssText = `--x:${(br() * 104 - 4).toFixed(1)}%;--y:${(18 + br() * 70).toFixed(0)}%;--s:${s.toFixed(0)}px;--b:${(s > 24 ? 2 + br() * 3 : .4 + br()).toFixed(1)}px;--o:${(.3 + br() * .5).toFixed(2)};--d:${(15 + br() * 18).toFixed(1)}s;--dl:${(-br() * 33).toFixed(1)}s;--dx:${(30 + br() * 110).toFixed(0)}px;--dy:${(50 + br() * 120).toFixed(0)}px`;
+    bokehEl.appendChild(el); } }
+
+resize();
+if (reduce) paint(0, 0); else requestAnimationFrame(frame);
+/* ── "elsewhere" dock: pixel icons, magnified by how close the cursor is ── */
+const ICONS = {
+  in: ['............', '.XX.........', '.XX.........', '............', '.XX..XX.XXX.', '.XX..XXXXXXX', '.XX..XXX..XX', '.XX..XX...XX', '.XX..XX...XX', '.XX..XX...XX', '.XX..XX...XX', '............'],
+  gh: ['............', '..X......X..', '..XX....XX..', '..XXXXXXXX..', '.XXXXXXXXXX.', '.XX.XXXX.XX.', '.XX.XXXX.XX.', '.XXXXXXXXXX.', '..XXXXXXXX..', '...XXXXXX...', '.X..XXXX....', '..XXXXXX....'],
+  x: ['............', 'XXX......XX.', '.XXX....XX..', '..XXX..XX...', '...XXXXX....', '....XXX.....', '....XXXX....', '...XX.XXX...', '..XX...XXX..', '.XX.....XXX.', 'XX.......XXX', '............'],
+  mail: ['............', '............', 'XXXXXXXXXXXX', 'XX........XX', 'X.XX....XX.X', 'X...XXXX...X', 'X..........X', 'X..........X', 'X..........X', 'XXXXXXXXXXXX', '............', '............'],
+  cal: ['............', '..X......X..', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.X........X.', '.X.XX.XX..X.', '.X........X.', '.X.XX.XX..X.', '.X........X.', '.X.XX.....X.', '.XXXXXXXXXX.', '............']
+};
+const dock = $('#dock'), dockItems = [...dock.querySelectorAll('a')], elseEl = $('#else');
+for (const a of dockItems) { let d = ''; ICONS[a.dataset.i].forEach((r, y) => { for (let x = 0; x < r.length; x++) if (r[x] === 'X') d += `M${x} ${y}h1v1h-1z`; });
+  a.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 12 12" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`); }
+let dkTarget = dockItems.map(() => 1), dkCur = dockItems.map(() => 1), dkRaf = 0, dkPitch = 0;
+const dkRun = () => { let moving = false;
+  dockItems.forEach((a, i) => { const d = dkTarget[i] - dkCur[i]; if (Math.abs(d) > .002) { dkCur[i] += d * .18; moving = true; } else dkCur[i] = dkTarget[i]; a.style.setProperty('--s', dkCur[i].toFixed(4)); });
+  dkRaf = moving ? requestAnimationFrame(dkRun) : 0; };
+const dkKick = () => { if (!dkRaf) dkRaf = requestAnimationFrame(dkRun); };
+const dkFit = () => { dock.style.setProperty('--shift', '0px'); const r = dock.getBoundingClientRect(); dock.style.setProperty('--shift', Math.round(r.left < 8 ? 8 - r.left : r.right > innerWidth - 8 ? innerWidth - 8 - r.right : 0) + 'px'); };
+elseEl.addEventListener('pointerenter', dkFit); elseEl.addEventListener('focus', dkFit);
+dock.addEventListener('pointermove', e => {
+  if (!dkPitch || dkCur.every(v => v === 1)) dkPitch = dockItems[0].offsetWidth / dkCur[0] + parseFloat(getComputedStyle(dock).columnGap);
+  const r = dock.getBoundingClientRect(), cx = r.left + r.width / 2, mid = (dockItems.length - 1) / 2; let best = 0, bd = 1e9;
+  dkTarget = dockItems.map((a, i) => { const d = Math.abs(e.clientX - (cx + (i - mid) * dkPitch)); if (d < bd) { bd = d; best = i; } return 1 + .45 * Math.exp(-((d / 62) ** 2)); });
+  dockItems.forEach((a, i) => a.toggleAttribute('data-near', i === best)); dkKick();
+});
+dock.addEventListener('pointerleave', () => { dkTarget = dockItems.map(() => 1); dockItems.forEach(a => a.removeAttribute('data-near')); dkKick(); });
+
+})();
+</script>
+</body>
+</html>
