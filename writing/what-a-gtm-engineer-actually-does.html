@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What a GTM engineer actually does — Alex Rivera</title>
+<meta name="description" content="Not quite sales ops, not quite data engineering. The plain-English version of the GTM engineer's job, and a real week of it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F0EC; --ink:#1B1F27; --soft:#4F545D; --mute:#84878E; --line:#D3CEC6; --accent:#C0362C;
+  --serif:"Instrument Serif",Georgia,serif; --sans:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"Geist Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font:400 clamp(17px,.3vw + 15.4px,19px)/1.75 var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-kerning:normal}
+::selection{background:var(--accent);color:#fff}
+a{color:inherit}
+.grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.06;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+main{width:min(640px,100% - 48px);margin:0 auto;padding:64px 0 40px}
+
+.slug{display:flex;justify-content:space-between;align-items:center;font:400 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.slug svg{width:14px;height:14px;color:var(--accent)}
+.back{display:inline-flex;gap:.45em;margin-top:64px;font:500 12px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--soft);text-decoration:none;transition:color .2s}
+.back span{transition:transform .3s var(--ease)}
+.back:hover{color:var(--accent)}
+.back:hover span{transform:translateX(-3px)}
+h1{margin-top:30px;font:400 clamp(2.4em,5.4vw,3.5em)/1 var(--serif);letter-spacing:-.014em;text-wrap:balance}
+h1 em{font-style:italic}
+.dek{margin-top:20px;font-size:1.12em;line-height:1.55;color:var(--soft);text-wrap:pretty}
+.byline{margin-top:24px;font:400 11px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.byline span + span::before{content:"·";margin:0 .9em}
+
+/* The text: one column, nothing in the way */
+article{margin-top:56px}
+article p{margin-top:1.2em;text-wrap:pretty}
+article > p:first-of-type{margin-top:0}
+article > p:first-of-type::first-letter{float:left;font:400 4.5em/.8 var(--serif);margin:.07em .05em 0 -.03em;color:var(--accent)}
+article h2{margin-top:2.3em;font:400 1.85em/1.12 var(--serif);letter-spacing:-.006em;text-wrap:balance}
+article h2 + p{margin-top:.75em}
+blockquote{position:relative;margin:2.3em 0;font:italic 400 1.9em/1.2 var(--serif);letter-spacing:-.006em;text-wrap:balance}
+blockquote::before{content:"\201C";position:absolute;right:calc(100% + .1em);top:-.06em;font-size:1.5em;line-height:1;color:var(--accent)}
+
+/* Figures */
+figure{margin:3em 0}
+figcaption{margin-top:20px;font-size:.78em;line-height:1.5;color:var(--soft);text-wrap:pretty}
+figcaption b{font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-right:.9em}
+
+/* Fig. 1: one company's path through the machine */
+.flow .track{position:relative}
+.flow ol{list-style:none;position:relative;display:grid;grid-template-columns:repeat(5,1fr)}
+.flow ol::before{content:"";position:absolute;left:10%;right:10%;top:17px;border-top:1px dashed var(--mute);opacity:.55}
+.flow li{position:relative;text-align:center;padding:0 5px}
+.flow .px{display:block;width:34px;height:34px;margin:0 auto;padding:5px;background:var(--paper);color:var(--ink);shape-rendering:crispEdges;opacity:0;transform:translateY(6px);transition:opacity .5s,transform .6s var(--ease);transition-delay:calc(var(--k)*110ms)}
+.flow.in .px{opacity:1;transform:none}
+.flow li b{display:block;margin-top:10px;font:500 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.flow li span{display:block;margin-top:7px;font-size:12.5px;line-height:1.4;color:var(--soft);text-wrap:balance}
+.flow .dot{position:absolute;left:10%;top:15px;width:5px;height:5px;margin-left:-2px;background:var(--accent);animation:travel 5s linear infinite}
+@keyframes travel{0%{left:10%;opacity:0}6%{opacity:1}94%{opacity:1}100%{left:90%;opacity:0}}
+.loop{display:block;width:100%;height:auto;margin-top:8px;overflow:visible}
+.loop path{fill:none;stroke:var(--accent);stroke-width:1;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s var(--ease) .7s}
+.flow.in .loop path{stroke-dashoffset:0}
+.loop polygon{fill:var(--accent);opacity:0;transition:opacity .3s 2s}
+.flow.in .loop polygon{opacity:1}
+.loop text{font:500 9.5px var(--mono);letter-spacing:.08em;fill:var(--accent);text-anchor:middle}
+.loop rect{fill:var(--paper)}
+
+/* Fig. 2: where the hours go */
+.split .bar{display:flex;gap:3px;height:12px}
+.split .bar i{flex:var(--w) 0 0;background:var(--c);transform:scaleX(0);transform-origin:0 50%;transition:transform .8s var(--ease);transition-delay:calc(var(--k)*120ms)}
+.split.in .bar i{transform:none}
+.split ul{list-style:none;display:flex;gap:3px;margin-top:14px}
+.split li{flex:var(--w) 0 0;min-width:0}
+.split li b{display:block;font:400 1.55em/1 var(--serif)}
+.split li span{display:block;margin-top:5px;font-size:12.5px;line-height:1.35;color:var(--soft)}
+
+/* Fig. 3: where the role sits */
+.venn svg{display:block;width:min(470px,100%);height:auto;margin:0 auto;overflow:visible}
+.venn .ring{fill:rgb(27 31 39 / .028);stroke:var(--ink);stroke-opacity:.5;stroke-width:1;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.3s var(--ease);transition-delay:calc(var(--k)*160ms)}
+.venn.in .ring{stroke-dashoffset:0}
+.venn .core{fill:var(--accent);opacity:0;transition:opacity .8s 1s}
+.venn.in .core{opacity:.2}
+.venn text{text-anchor:middle}
+.venn .t1{font:500 10.5px var(--mono);letter-spacing:.09em;fill:var(--ink)}
+.venn .t2{font:400 9.5px var(--sans);fill:var(--soft)}
+.venn .t3{font:italic 400 12px var(--serif);fill:var(--mute)}
+.venn .tc{font:500 10.5px var(--mono);letter-spacing:.09em;fill:var(--accent)}
+
+/* The end */
+.fin{display:block;width:27px;height:33px;margin:3.4em auto 0}
+.fin svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+.end{display:flex;justify-content:space-between;gap:28px;margin-top:3.2em}
+.end a{display:block;text-decoration:none}
+.end small{display:block;font:500 10px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--mute);transition:color .2s}
+.end a > span{display:inline-block;margin-top:10px;font:400 1.3em/1.25 var(--serif);background:linear-gradient(var(--accent),var(--accent)) 0 100%/0 1px no-repeat;transition:background-size .5s var(--ease)}
+.end a:hover span,.end a:focus-visible span{background-size:100% 1px}
+.end a:hover small{color:var(--accent)}
+.end .next{text-align:right}
+footer{margin-top:64px;display:flex;justify-content:space-between;font:400 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+
+.rise{opacity:0;transform:translateY(10px);animation:rise .7s var(--ease) forwards;animation-delay:calc(var(--i,0)*80ms)}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* The bay closes the page: the same world as the home page, a different view */
+.bay{position:relative;height:clamp(150px,20vh,190px);pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1.2s .2s}
+.bay.on{opacity:1}
+.bay canvas{position:absolute;left:0;bottom:0;display:block;image-rendering:crisp-edges;image-rendering:pixelated}
+
+@media (max-width:620px){
+  main{padding-top:40px}
+  .back{margin-top:44px}
+  blockquote{padding-left:.75em;font-size:1.6em}
+  blockquote::before{right:auto;left:-.12em}
+  /* Fig. 1 turns to read downwards */
+  .flow ol{grid-template-columns:1fr;gap:18px}
+  .flow ol::before{left:16px;right:auto;top:17px;bottom:17px;border-top:0;border-left:1px dashed var(--mute)}
+  .flow li{display:grid;grid-template-columns:34px 1fr;column-gap:16px;text-align:left;padding:0}
+  .flow .px{grid-row:1 / 3;margin:0}
+  .flow li b{margin-top:4px}
+  .flow li span{margin-top:3px;text-wrap:pretty}
+  .flow .dot{left:16px;top:17px;animation-name:travel-down}
+  .loop{display:none}
+  .split ul{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+  .end{flex-direction:column}
+  .end .next{text-align:left}
+}
+@keyframes travel-down{0%{top:17px;opacity:0}6%{opacity:1}94%{opacity:1}100%{top:calc(100% - 17px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.rise{opacity:1;transform:none}.flow .dot{display:none}
+  .flow .px{opacity:1;transform:none}.loop path,.venn .ring{stroke-dashoffset:0}.loop polygon{opacity:1}.split .bar i{transform:none}.venn .core{opacity:.2}}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<main>
+  <div class="slug" aria-hidden="true">
+    <span>Proof 01 — Writing</span>
+    <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1"><circle cx="7" cy="7" r="4"/><path d="M7 0v14M0 7h14"/></svg>
+    <span>SF 94110 · Rev. 2026.11</span>
+  </div>
+
+  <header>
+    <a class="back rise" href="../writing.html"><span>←</span> All writing</a>
+    <h1 class="rise" style="--i:1">What a GTM engineer <em>actually</em> does</h1>
+    <p class="dek rise" style="--i:2">Not quite sales ops, not quite data engineering. The plain-English version of the job, and what a real week of it looks like.</p>
+    <p class="byline rise" style="--i:3"><span>Alex Rivera</span><span>Nov 16, 2026</span><span>7 min read</span></p>
+  </header>
+
+  <article>
+    <p>When I tell people I’m a GTM engineer, I usually get one of two reactions. Engineers assume I work on sales software. Salespeople assume I’m the person who fixes the CRM, the database their whole team lives in. Both are a little bit right, and both miss what the job is really for.</p>
+    <p>GTM stands for go-to-market: everything a company does to find customers, reach them and win them. For most of the history of sales, that work ran on people. Someone researched accounts by hand, someone copied data from one tool into another, and someone decided each morning who to call. A GTM engineer builds the systems that do that work automatically, and does it well enough that the people can spend their time on the one part only people can do, which is the conversation.</p>
+    <p>If a sales rep is a driver, I build the car, the roads and the dashboard.</p>
+
+    <h2>The machine</h2>
+    <p>The easiest way to explain the job is to follow one company through the thing I build.</p>
+    <p>It starts as a name on a list. On its own that name is close to useless, so the first thing the system does is enrich it. It pulls in who works there, how big the company is, which tools they already use and whether anything has changed lately. Most of that comes from outside data providers, and a surprising amount of the craft is in combining several of them, so the gaps in one are covered by another.</p>
+    <p>Good data still doesn’t tell you when to reach out, so the next layer watches for signals. A new head of sales joins. The company raises money. Someone spends ten minutes on our pricing page. When one of those happens, the account goes to the right person with the reason attached, while it still matters.</p>
+    <p>Then comes the outreach itself, which is the part most people picture when they hear about this job. I build the sequences and the plumbing behind them, but the goal is the opposite of volume.</p>
+
+    <blockquote>The job isn’t sending more emails. It’s making sure fewer, better ones go to the right people at the right moment.</blockquote>
+
+    <p>The last piece is measurement. Every step produces numbers, and I turn them into a small set of dashboards that show what is creating real pipeline, meaning deals a salesperson is actually working, and what only looks busy. Whatever we learn there goes straight back into the top of the machine: better lists, sharper signals, messages that sound more like a person wrote them.</p>
+
+    <figure class="flow" id="fig1">
+      <div class="track"><ol>
+        <li><svg class="px" data-i="list" style="--k:0" viewBox="0 0 12 12" aria-hidden="true"></svg><b>List</b><span>A company is just a name</span></li>
+        <li><svg class="px" data-i="enrich" style="--k:1" viewBox="0 0 12 12" aria-hidden="true"></svg><b>Enrich</b><span>Who works there, what they use</span></li>
+        <li><svg class="px" data-i="signal" style="--k:2" viewBox="0 0 12 12" aria-hidden="true"></svg><b>Signal</b><span>The moment it’s worth a call</span></li>
+        <li><svg class="px" data-i="reach" style="--k:3" viewBox="0 0 12 12" aria-hidden="true"></svg><b>Reach</b><span>The right note to the right person</span></li>
+        <li><svg class="px" data-i="measure" style="--k:4" viewBox="0 0 12 12" aria-hidden="true"></svg><b>Measure</b><span>What really produced pipeline</span></li>
+      </ol><i class="dot" aria-hidden="true"></i></div>
+      <svg class="loop" viewBox="0 0 640 56" aria-hidden="true">
+        <path pathLength="1" d="M576 6 C576 46, 64 46, 64 12"/>
+        <polygon points="64,4 60,13 68,13"/>
+        <rect x="232" y="27" width="176" height="18"/>
+        <text x="320" y="39">WHAT IT LEARNS GOES BACK IN</text>
+      </svg>
+      <figcaption><b>Fig. 1</b>One company’s path through the machine. What the last step learns goes back into the first.</figcaption>
+    </figure>
+
+    <h2>A real week</h2>
+    <p>That’s the theory. In practice a week is messier, and more interesting. Last week began with a bug: a third of our new leads were arriving without a job title. It turned out two data providers were overwriting each other, and the fix was nothing more than changing the order they run in. On Tuesday I built an alert that fires when a company we care about posts a job ad for a role we sell to, and sends it to the account’s owner with the context attached.</p>
+    <p>On Wednesday I didn’t build anything. I sat in on four sales calls instead, because you can’t build for a team you don’t watch work. Thursday was cleanup. I deleted forty-one CRM fields that nobody was using, and nobody noticed, which was the point. On Friday I went through the weekly numbers with our head of sales, and we killed a campaign that had looked busy for a month and booked nothing.</p>
+
+    <figure class="split" id="fig2">
+      <div class="bar" aria-hidden="true"><i style="--w:45;--k:0;--c:#C0362C"></i><i style="--w:20;--k:1;--c:#1B1F27"></i><i style="--w:20;--k:2;--c:#6B6F78"></i><i style="--w:15;--k:3;--c:#B5B2AC"></i></div>
+      <ul>
+        <li style="--w:45"><b>45%</b><span>Building</span></li>
+        <li style="--w:20"><b>20%</b><span>Fixing data</span></li>
+        <li style="--w:20"><b>20%</b><span>With the sales team</span></li>
+        <li style="--w:15"><b>15%</b><span>Measuring</span></li>
+      </ul>
+      <figcaption><b>Fig. 2</b>Roughly where a week’s hours go. Less of it is building than people expect.</figcaption>
+    </figure>
+
+    <h2>What it isn’t</h2>
+    <p>It isn’t classic sales operations, though it grew out of it. Sales ops traditionally keeps the tools configured and the reports running. A GTM engineer is expected to build: to write code, design how data flows, ship automations and own whether they work. It isn’t quite data engineering either, because success isn’t a tidy stream of data. Success is a salesperson having a better conversation on Thursday than they would have had without you.</p>
+
+    <figure class="venn" id="fig3">
+      <svg viewBox="0 0 400 304" role="img" aria-label="Three overlapping circles labelled Sales, Data and Engineering. The GTM engineer sits where all three overlap.">
+        <defs><clipPath id="cA"><circle cx="150" cy="112" r="92"/></clipPath><clipPath id="cB"><circle cx="250" cy="112" r="92"/></clipPath></defs>
+        <g clip-path="url(#cA)"><g clip-path="url(#cB)"><circle class="core" cx="200" cy="198" r="92"/></g></g>
+        <circle class="ring" style="--k:0" pathLength="1" cx="150" cy="112" r="92"/>
+        <circle class="ring" style="--k:1" pathLength="1" cx="250" cy="112" r="92"/>
+        <circle class="ring" style="--k:2" pathLength="1" cx="200" cy="198" r="92"/>
+        <text class="t1" x="104" y="84">SALES</text><text class="t2" x="104" y="98">knows the</text><text class="t2" x="104" y="110">customer</text>
+        <text class="t1" x="296" y="84">DATA</text><text class="t2" x="296" y="98">knows the</text><text class="t2" x="296" y="110">numbers</text>
+        <text class="t1" x="200" y="252">ENGINEERING</text><text class="t2" x="200" y="266">builds the thing</text>
+        <text class="t3" x="200" y="66">sales ops</text>
+        <text class="t3" x="137" y="186">sales tools</text>
+        <text class="t3" x="263" y="186">data eng.</text>
+        <text class="tc" x="200" y="140">GTM</text><text class="tc" x="200" y="154">ENGINEER</text>
+      </svg>
+      <figcaption><b>Fig. 3</b>The role borrows from three older ones. It only exists where all of them meet.</figcaption>
+    </figure>
+
+    <p>And it isn’t spam at scale. The worst version of this job is someone who wires up a tool to send ten thousand generic emails. The best version uses automation to make outreach more relevant, not more frequent.</p>
+
+    <h2>What you need to be good at it</h2>
+    <p>You need enough code to be dangerous. For most people that means scripting, SQL and being comfortable with APIs. You don’t have to be a software engineer, but you do have to build things yourself instead of filing a ticket and waiting.</p>
+    <p>You need data instincts, which mostly means noticing a number is wrong before anyone tells you. You need sales empathy, an honest sense of what a rep’s day feels like, because the things you build only matter if they get used. And you need taste in tools, which is knowing when to buy, when to build and, more often than you’d think, when to delete.</p>
+    <p>If you’re curious about the role, or you’re already doing it and see it differently, I’d love to hear from you. That’s half the reason I write these.</p>
+  </article>
+
+  <span class="fin" id="fin" aria-hidden="true"></span>
+
+  <nav class="end" aria-label="More writing">
+    <a href="../writing.html"><small>← Back to</small><span>All writing</span></a>
+    <a class="next" href="../writing.html"><small>Next, in December →</small><span>How I’d break into GTM engineering today</span></a>
+  </nav>
+
+  <footer><span>© 2026 Alex Rivera</span><span>Written in San Francisco</span></footer>
+</main>
+<script>
+(() => {
+/* Pixel icons for Fig. 1, in the same hand as the icons on the home page */
+const ICONS = {
+  list: ['............', '............', '.XX.XXXXXXX.', '.XX.XXXXXXX.', '............', '.XX.XXXXXXX.', '.XX.XXXXXXX.', '............', '.XX.XXXXXXX.', '.XX.XXXXXXX.', '............', '............'],
+  enrich: ['............', '.....XX.....', '.....XX.....', '....XXXX....', '..XXXXXXXX..', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '..XXXXXXXX..', '....XXXX....', '.....XX.....', '.....XX.....', '............'],
+  signal: ['............', '.....XX.....', '....XXXX....', '...XXXXXX...', '...XXXXXX...', '...XXXXXX...', '..XXXXXXXX..', '..XXXXXXXX..', '.XXXXXXXXXX.', '............', '.....XX.....', '............'],
+  reach: ['............', '............', 'XXXXXXXXXXXX', 'XX........XX', 'X.XX....XX.X', 'X...XXXX...X', 'X..........X', 'X..........X', 'X..........X', 'XXXXXXXXXXXX', '............', '............'],
+  measure: ['............', '.........XX.', '.........XX.', '......XX.XX.', '......XX.XX.', '...XX.XX.XX.', '...XX.XX.XX.', 'XX.XX.XX.XX.', 'XX.XX.XX.XX.', 'XX.XX.XX.XX.', 'XXXXXXXXXXXX', '............']
+};
+for (const svg of document.querySelectorAll('.px')) { let d = ''; ICONS[svg.dataset.i].forEach((r, y) => { for (let x = 0; x < r.length; x++) if (r[x] === 'X') d += `M${x} ${y}h1v1h-1z`; }); svg.innerHTML = `<path d="${d}" fill="currentColor"/>`; }
+
+/* Figures draw themselves in the first time they come into view */
+const figs = [...document.querySelectorAll('figure')];
+if ('IntersectionObserver' in window) { const io = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }, { threshold: .35 }); figs.forEach(f => io.observe(f)); }
+else figs.forEach(f => f.classList.add('in'));
+
+/* The end mark: the channel buoy from the home page, drawn pixel by pixel */
+const BUOY = ['....w....', '....R....', '...RRR...', '...R.R...', '...R.R...', '..RRRRR..', '..RWWWR..', '..RRRRR..', '.kkkkkRR.', 'RRRRRRRRR', 'rrrrrrrrr'], INK = { R: '#C0362C', r: '#96281F', w: '#D9A441', W: '#FFFDF9', k: '#604A39' };
+let rects = ''; BUOY.forEach((row, y) => [...row].forEach((ch, x) => { if (INK[ch]) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${INK[ch]}"/>`; }));
+document.getElementById('fin').innerHTML = `<svg viewBox="0 0 9 11">${rects}</svg>`;
+})();
+</script>
+<div class="bay" id="bay" aria-hidden="true"><canvas></canvas></div>
+<script>
+/* The bay: a pixel-art scene for the writing pages. Same world as the home page (same palette,
+   same fog made of the page itself), a different view: Alcatraz across the water, and the
+   paddler taking a break on a pier to write, his board beside him and the dog keeping watch. */
+(() => {
+const host = document.getElementById('bay'); if (!host) return;
+const cv = host.querySelector('canvas'), g2 = cv.getContext('2d'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rgb = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const pack = (r, g, b) => ((255 << 24) | (b << 16) | (g << 8) | r) >>> 0;
+const col = h => { const c = rgb(h); return pack(c[0], c[1], c[2]); };
+const ramp = s => s.split(' ').map(col);
+const mixc = (a, b, t) => pack(Math.round((a & 255) + ((b & 255) - (a & 255)) * t), Math.round(((a >> 8) & 255) + (((b >> 8) & 255) - ((a >> 8) & 255)) * t), Math.round(((a >> 16) & 255) + (((b >> 16) & 255) - ((a >> 16) & 255)) * t));
+const PAPER = col('#F2F0EC');
+const C = { water: ramp('#C6D5DB #ABC5D0 #8DB1C2 #729BB3 #5B89A6 #4A7A9A'), marin: ramp('#C6BF94 #A9AE89 #8C987D'), rock: ramp('#CDBB9A #AE9A7A #8B7860 #6E5F50'), scrub: ramp('#8FA07A #6F8563'),
+  wall: col('#E6DFD2'), wallD: col('#C4BBAB'), roof: col('#7A7068'), dark: col('#3A3432'), white: col('#FFFFFF'), wsh: col('#D3DAE2'), navy: col('#2E3F5C'), blue: col('#3F6C9A'), rust: col('#A8553C'),
+  red: col('#C0362C'), redD: col('#96281F'), skin: col('#F0C7A8'), coat: col('#F2E9D8'), slate: col('#3A3F55'), ink: col('#2A2D3B'),
+  dog: col('#D79A52'), dogD: col('#A8743A'), cream: col('#F4E3C6'), wood: col('#8A6248'), woodM: col('#6B4A38'), woodD: col('#4C3429'), fog: col('#E6E3E1'), gold: col('#FFE9A8'), bird: col('#565A68') };
+const hash2 = (x, y) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+const vnoise = (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+  const a = hash2(xi, yi), b = hash2(xi + 1, yi), c = hash2(xi, yi + 1), d = hash2(xi + 1, yi + 1); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; };
+const fb2 = (x, y) => vnoise(x, y) * .64 + vnoise(x * 2.07 + 17.1, y * 2.07 + 3.7) * .36;
+const B4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(v => (v + .5) / 16);
+const bay = (x, y) => B4[((y & 3) << 2) | (x & 3)];
+const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+
+let W = 0, H = 0, img = null, buf = null, back = null, wIdx = null, fogA = null, HZ = 0, IX = 0, PE = 0, DKY = 0, frameNo = 0, last = 0;
+const inb = (x, y) => x >= 0 && x < W && y >= 0 && y < H;
+const put = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (inb(x, y)) buf[y * W + x] = c; };
+const blit = (set, rows, x0, y0, map) => { for (let j = 0; j < rows.length; j++) for (let i = 0; i < rows[j].length; i++) { const c = map[rows[j][i]]; if (c !== undefined) set(x0 + i, y0 + j, c); } };
+
+const FERRY = ['....WWWWWWWW......', '...WkWkWkWkWW.....', '..WWWWWWWWWWWWW...', '.BBBBBBBBBBBBBBBB.', 'WWWWWWWWWWWWWWWWWW', '.wwwwwwwwwwwwwwww.'];
+const SAIL_S = ['..W..', '..Ww.', '.WWw.', '.WWw.', 'HHHHH'], SAIL_M = ['...W...', '...Ww..', '..WWw..', '..WWww.', '.WWWww.', '.WWWwww', 'WWWWwww', '...M...', 'RHHHHH.'];
+const BM = { W: C.white, w: C.wsh, H: C.navy, M: C.ink, R: C.red, k: C.navy, B: C.blue };
+const WRITE = [['...P....', '..HHH...', '.hhhh...', '..FFe...', '.SSSS...', '..CCC...', '..CCMn..', '..CCbb..', '..TTTT..', '.....T..', '.....T..', '.....K..'],
+               ['...P....', '..HHH...', '.hhhh...', '..FFe...', '.SSSS...', '..CCC...', '..CCnM..', '..CCbb..', '..TTTT..', '.....T..', '.....T..', '.....K..'],
+               ['...P....', '..HHH...', '.hhhh...', '..FFe...', '.SSSS...', '..CCCM..', '..CC.n..', '..CCbb..', '..TTTT..', '.....T..', '.....T..', '.....K..']];   // writing, writing, thinking
+const WM = { P: C.white, H: C.red, h: C.redD, F: C.skin, e: C.ink, S: C.red, C: C.coat, M: C.red, n: C.white, b: C.blue, T: C.slate, K: C.ink };
+const DOG = [['....EE....', '...OOOOk..', '...OOOC...', '..OOOO....', '.OOOOO....', 'TOO.OO....'], ['....EE....', '...OOOOk..', '...OOOC...', '..OOOO....', 'TOOOOO....', '.OO.OO....']];
+const DM = { E: C.dogD, T: C.dog, O: C.dog, C: C.cream, k: C.ink };
+let boats = [], gulls = [];
+
+function bake() {
+  back = new Uint32Array(W * H); wIdx = new Uint8Array(W * H);
+  const setB = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (inb(x, y)) { back[y * W + x] = c; wIdx[y * W + x] = 0; } };
+  for (let y = HZ; y < H; y++) { const u = Math.pow((y - HZ) / (H - 1 - HZ), .8) * 5; for (let x = 0; x < W; x++) { const k = clamp(Math.floor(u + bay(x, y)), 0, 5); back[y * W + x] = C.water[k]; wIdx[y * W + x] = k + 1; } }
+  for (let x = 0; x < W; x++) {                                                  // far shores, deep in the haze
+    const hl = (8 * Math.pow(sstep(W * .36, 0, x), .6) + (vnoise(x * .09, 2) - .5) * 3) * sstep(W * .36, W * .3, x), hr = (5 + (vnoise(x * .08, 9) - .5) * 2) * sstep(W * .8, W, x);
+    for (let i = 0; i < Math.round(hl); i++) setB(x, HZ - 1 - i, mixc(C.marin[vnoise(x * .2, i * .5) > .55 || i < 1 ? 2 : 1], PAPER, .45));
+    for (let i = 0; i < Math.round(hr); i++) setB(x, HZ - 1 - i, mixc(C.marin[1], PAPER, .62));
+  }
+  const top = dx => Math.max(0, 11 * (1 - Math.pow(Math.abs(dx) / 34, 2.2)) + (vnoise((IX + dx) * .3, 4) - .5) * 2.2), hz = c => mixc(c, PAPER, .18), roofY = HZ - 16;
+  for (let dx = -34; dx <= 34; dx++) { const h = Math.round(top(dx));            // Alcatraz: the rock
+    for (let i = 0; i <= h; i++) { const x = IX + dx, y = HZ - i, n = vnoise(x * .4, y * .5 + 3);
+      let c = i === 0 ? C.rock[3] : C.rock[clamp(Math.floor(.4 + n * 2.4 + (i < 3 ? 1 : 0) + (bay(x, y) - .5) * .8), 0, 3)];
+      if (i > h - 2 && i > 2 && n > .5) c = C.scrub[n > .7 ? 1 : 0];
+      setB(x, y, hz(c)); } }
+  for (let i = 0; i < 28; i++) for (let j = 0; j < 6; j++) setB(IX - 12 + i, roofY + j, hz(j === 0 ? C.roof : i >= 26 ? C.wallD : (j === 2 || j === 4) && (i & 1) ? C.dark : C.wall));   // the cellhouse
+  for (let j = 0; j < 11; j++) { setB(IX - 17, roofY - 4 + j, hz(C.white)); setB(IX - 16, roofY - 4 + j, hz(C.wsh)); }                                                               // the lighthouse
+  setB(IX - 17, roofY - 5, hz(C.dark)); setB(IX - 16, roofY - 5, hz(C.dark));
+  for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) setB(IX - 28 + i, HZ - 13 + j, hz(C.rust));                                                                                // the water tower
+  for (let j = 0; j < 7; j++) { setB(IX - 28, HZ - 10 + j, hz(C.dark)); setB(IX - 26, HZ - 10 + j, hz(C.dark)); }
+  for (let i = 0; i < 7; i++) for (let j = 0; j < 3; j++) setB(IX + 22 + i, HZ - 3 + j, hz(j === 0 ? C.roof : C.wall));                                                              // the dock
+  for (let x = 0; x <= PE; x++) { setB(x, DKY, C.wood); setB(x, DKY + 1, x % 4 === 3 ? C.woodD : C.woodM);                                                                           // the pier
+    if (x % 13 === 5 || x === PE - 1) for (let y = DKY + 2; y < H; y++) { setB(x, y, C.woodD); setB(x + 1, y, (y & 1) ? C.woodD : C.woodM); } }
+  blit(setB, ['.WWWWWWWWWWWWWWRR', 'wwwwwwwwwwwwwww..'], 2, DKY - 2, { W: C.white, R: C.red, w: C.wsh });                                                                         // the board he came on
+}
+function resize() {
+  const DPR = devicePixelRatio || 1, K = Math.max(1, Math.round((innerWidth < 640 ? 2 : 3) * DPR));
+  W = Math.ceil(host.clientWidth * DPR / K); H = Math.ceil(host.clientHeight * DPR / K); if (!W || !H) return;
+  cv.width = W; cv.height = H; cv.style.width = (W * K / DPR) + 'px'; cv.style.height = (H * K / DPR) + 'px';
+  img = g2.createImageData(W, H); buf = new Uint32Array(img.data.buffer);
+  HZ = H - 26; IX = Math.round(W * (W < 220 ? .7 : .62)); PE = 54; DKY = H - 13;
+  bake(); fogA = new Uint8Array(W * 23);
+  const lane = k => HZ + 4 + k * 8, x0 = PE + 16;
+  boats = [{ rows: SAIL_S, x: W * .82, y: HZ + 2, v: -1, lo: -10, hi: W + 10 }, { rows: FERRY, x: W * .4, y: lane(.4), v: 3.6, lo: x0, hi: IX + 4, turn: 1 }, { rows: SAIL_M, x: W * .86, y: lane(1.3), v: -1.6, lo: x0, hi: W + 12 }];
+  gulls = [0, 1, 2, 3].map(k => ({ x: W * (.15 + k * .22), y: HZ - 14 + k * 3, v: (3 + k) * (k & 1 ? -1 : 1), ph: k * 1.7, low: k === 3 }));
+}
+function paint(t, dt) {
+  buf.set(back);
+  for (let y = HZ + 1; y < H; y++) { const row = y * W; for (let x = 0; x < W; x++) { const k = wIdx[row + x]; if (!k) continue;                 // ripples and whitecaps
+    if (vnoise(x * .3 - t * .5, y * 1.7 + t * .15) > .79) buf[row + x] = C.water[Math.max(0, k - 2)];
+    else if (hash2(x >> 1, y * 31 + ((t * 2.5 + (x >> 1) * .37) | 0)) < .004) buf[row + x] = C.white; } }
+  if (Math.sin(t * 1.3) > .55) { put(IX - 17, HZ - 22, C.gold); put(IX - 16, HZ - 22, C.gold); put(IX - 18, HZ - 22, C.white); put(IX - 15, HZ - 22, C.white); }   // the lighthouse turns
+  for (const b of boats) { b.x += b.v * dt; const w = b.rows[0].length;
+    if (b.turn) { if ((b.v > 0 && b.x > b.hi) || (b.v < 0 && b.x < b.lo)) b.v = -b.v; } else if (b.v < 0 && b.x < b.lo - w) b.x = b.hi; else if (b.v > 0 && b.x > b.hi) b.x = b.lo - w;
+    const bx = Math.round(b.x), by = Math.round(b.y + Math.sin(t * 1.5 + b.y) * .5), flip = b.turn && b.v < 0;
+    for (let j = 0; j < b.rows.length; j++) for (let i = 0; i < w; i++) { const c = BM[b.rows[j][i]]; if (c !== undefined) put(bx + (flip ? w - 1 - i : i), by - b.rows.length + 1 + j, c); }
+    for (let i = 1; i <= 3; i++) if ((i + ((t * 5) | 0)) & 1) put(b.v > 0 ? bx - i : bx + w - 1 + i, by, C.white); }
+  if (frameNo % 3 === 0 || reduce) { let k = 0;                                                                                                // fog: pixels handed back to the page
+    for (let y = HZ - 20; y <= HZ + 2; y++) { const v = clamp((1 - Math.abs(y - (HZ - 13)) / 8) * 1.8, 0, 1);
+      for (let x = 0; x < W; x++, k++) { const a = clamp((fb2(x * .022 - t * .03, y * .07 + t * .008 + 3) - .5) * 3, 0, 1) * v * (.5 + .3 * sstep(0, W, x)), b = bay(x, y);
+        fogA[k] = a > b + .22 ? 2 : a > b * .85 + .03 ? 1 : 0; } } }
+  for (let y = Math.max(0, HZ - 20), k = (y - (HZ - 20)) * W; y <= HZ + 2; y++) { const row = y * W, sky = y > HZ - 8; for (let x = 0; x < W; x++, k++) { const f = fogA[k]; if (f === 2) buf[row + x] = 0; else if (f === 1 && (sky || buf[row + x])) buf[row + x] = C.fog; } }
+  for (const g of gulls) { g.x += g.v * dt; if (g.x > W + 10) g.x = -10; else if (g.x < -10) g.x = W + 10;
+    const gx = Math.round(g.x), gy = Math.round((g.low ? HZ + 5 : g.y) + Math.sin(t * .8 + g.ph) * 1.5), e = (Math.floor(t * (g.low ? 1.2 : 3.5) + g.ph) & 1) ? 1 : -1;
+    put(gx - 2, gy + e, C.bird); put(gx - 1, gy, C.bird); put(gx, gy, C.bird); put(gx + 1, gy, C.bird); put(gx + 2, gy + e, C.bird); }
+  const think = (t % 9) > 7.2, fr = think ? 2 : (Math.floor(t / .32) & 1);                                                                     // he writes, stops to think, writes again
+  blit(put, WRITE[fr], PE - 4, DKY - 9, WM);
+  blit(put, DOG[Math.floor(t / .28) & 1], PE - 18, DKY - 6, DM);
+  g2.putImageData(img, 0, 0);
+}
+function frame(now) { requestAnimationFrame(frame); if (now - last < 33) return; const dt = Math.min(.05, (now - last) / 1000); last = now; frameNo++; if (buf) paint(now / 1000, dt); }
+let rsT = 0;
+addEventListener('resize', () => { clearTimeout(rsT); rsT = setTimeout(() => { resize(); if (reduce && buf) paint(0, 0); }, 140); });
+resize(); if (buf) paint(0, 0); host.classList.add('on');
+if (!reduce) requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

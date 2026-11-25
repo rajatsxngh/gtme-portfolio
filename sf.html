@@ -185,7 +185,9 @@ h1 em{font-style:italic}
 
       <p><span class="fade">Right now I lead GTM engineering at </span><a class="lk" href="#" data-p="northwind"><span class="ico" style="--c:#1B1F27">N</span>Northwind<sup>+212%</sup></a><span class="fade"> and advise the growth team at </span><a class="lk" href="#" data-p="lumen"><span class="ico" style="--c:#2E5A7A">L</span>Lumen Labs<sup>18.4%</sup></a><span class="fade">.</span></p>
 
-      <p><span class="fade">Before that I took </span><a class="lk" href="#" data-p="fieldnote">Fieldnote<sup>$4.1M</sup></a><span class="fade"> from zero to a real pipeline. Off-hours I </span><a class="lk" href="#" data-p="run">paddle the bay<sup>812 mi</sup></a><span class="fade">, shoot </span><a class="lk" href="#" data-p="film">film in the fog<sup>36 rolls</sup></a><span class="fade">, and write in a public </span><a class="lk" href="#" data-p="notes">notebook<sup>48</sup></a><span class="fade">.</span></p>
+      <p><span class="fade">Before that I took </span><a class="lk" href="#" data-p="fieldnote">Fieldnote<sup>$4.1M</sup></a><span class="fade"> from zero to a real pipeline. I </span><a class="lk" href="writing.html" data-p="notes">write about GTM engineering in public<sup>6 posts</sup></a><span class="fade">: how the role works, how to get into it, and what I've learned building it.</span></p>
+
+      <p><span class="fade">Off-hours I </span><a class="lk" href="#" data-p="run">paddle the bay<sup>812 mi</sup></a><span class="fade"> and shoot </span><a class="lk" href="#" data-p="film">film in the fog<sup>36 rolls</sup></a><span class="fade">.</span></p>
     </div>
   </div>
 
@@ -258,7 +260,7 @@ const PV = {
   fieldnote:{label:'FIELDNOTE · ARR PIPELINE',     v:4.1, f:v=>`$${v.toFixed(1)}M`, kind:'line', s:series(11,32,.7), foot:'0 → seed → A'},
   run:      {label:'MILES PADDLED · THE BAY',      v:812, f:v=>`${Math.round(v)} mi`,kind:'bars', s:series(5,12,.1), foot:'Jan — Nov'},
   film:     {label:'ROLLS SHOT · MOSTLY FOG',      v:36,  f:v=>`${Math.round(v)}`,   kind:'dots', s:series(9,36,0),  foot:'36 rolls · Portra 400'},
-  notes:    {label:'NOTEBOOK · ESSAYS',            v:48,  f:v=>`${Math.round(v)}`,   kind:'dots', s:series(13,48,0), foot:'on outbound, data, craft'},
+  notes:    {label:'WRITING · GTM ENGINEERING',    v:6,   f:v=>`${Math.round(v)} posts`, kind:'dots', s:series(13,6,0), foot:'the role, getting in, playbooks'},
 };
 const card = $('#card'), cvs = card.querySelector('canvas'), ctx = cvs.getContext('2d');
 const CW = cvs.width, CH = cvs.height;  // 2x for retina
@@ -332,7 +334,7 @@ document.querySelectorAll('.lk').forEach(el => {
   el.addEventListener('pointerleave', () => close(el));
   el.addEventListener('focus', () => open(el));
   el.addEventListener('blur', () => close(el));
-  el.addEventListener('click', e => e.preventDefault());   // dummy links
+  el.addEventListener('click', e => { if (el.getAttribute('href') === '#') e.preventDefault(); });   // placeholder links stay put; real ones navigate
 });
 document.querySelectorAll('.dock a').forEach(a => a.addEventListener('click', e => e.preventDefault()));
 
